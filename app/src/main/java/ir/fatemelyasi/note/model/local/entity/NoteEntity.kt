@@ -1,4 +1,4 @@
-package ir.fatemelyasi.note.local
+package ir.fatemelyasi.note.model.local.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
@@ -8,8 +8,8 @@ import androidx.room.PrimaryKey
 data class NoteEntity(
 
     @PrimaryKey(autoGenerate = true)
-    @ColumnInfo(name = "id")
-    val id: Int?,
+    @ColumnInfo(name = "noteId")
+    val noteId: Int?,
 
     @ColumnInfo(name = "title")
     val title: String?,
@@ -27,9 +27,6 @@ data class NoteEntity(
     val updatedAt: Long?,
 
     @ColumnInfo(name = "isFavorite")
-    val isFavorite: Boolean?,
+    val isFavorite: Boolean? = false,
 
-    @ColumnInfo(name = "label")
-    val label: String?,
 )
-

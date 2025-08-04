@@ -1,7 +1,7 @@
-package ir.fatemelyasi.note.noteLocalDataSource
+package ir.fatemelyasi.note.model.noteLocalDataSource
 
-import ir.fatemelyasi.note.local.NoteDao
-import ir.fatemelyasi.note.local.NoteEntity
+import ir.fatemelyasi.note.model.local.dao.NoteDao
+import ir.fatemelyasi.note.model.local.entity.NoteEntity
 import kotlinx.coroutines.flow.Flow
 import org.koin.core.annotation.Single
 
@@ -14,7 +14,7 @@ class NoteLocalDataSourceImpl(
     }
 
     override fun getNoteById(id: Int): Flow<NoteEntity>? {
-        return noteDao.getNoteById(id = id)
+        return noteDao.getNoteById(id)
     }
 
     override suspend fun insertNote(note: NoteEntity) {
@@ -44,9 +44,4 @@ class NoteLocalDataSourceImpl(
     override suspend fun setFavorite(noteId: Long, isFavorite: Boolean) {
         return noteDao.setFavorite(noteId = noteId, isFavorite = isFavorite)
     }
-
-    override fun getNotesByLabel(label: String): Flow<List<NoteEntity>> {
-        return noteDao.getNotesByLabel(label = label)
-    }
-
 }

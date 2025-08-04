@@ -1,6 +1,6 @@
-package ir.fatemelyasi.note.di.applicationModule
+package ir.fatemelyasi.note.model.di.applicationModule
 
-import ir.fatemelyasi.note.di.databaseModule.DatabaseModule
+import ir.fatemelyasi.note.model.di.databaseModule.DatabaseModule
 import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Module
 

@@ -1,6 +1,6 @@
-package ir.fatemelyasi.note.noteLocalRepository
+package ir.fatemelyasi.note.model.noteLocalRepository
 
-import ir.fatemelyasi.note.local.NoteEntity
+import ir.fatemelyasi.note.model.local.entity.NoteEntity
 import kotlinx.coroutines.flow.Flow
 
 interface NoteLocalRepository {
@@ -13,5 +13,4 @@ interface NoteLocalRepository {
     fun searchNotes(query: String): Flow<List<NoteEntity>>
     fun getFavoriteNotes(): Flow<List<NoteEntity>>
     suspend fun setFavorite(noteId: Long, isFavorite: Boolean)
-    fun getNotesByLabel(label: String): Flow<List<NoteEntity>>
 }

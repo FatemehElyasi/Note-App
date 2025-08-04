@@ -12,5 +12,5 @@ data class NoteViewEntity(
     val isFavorite: Boolean = false,
     val createdAt: Long,
     val updatedAt: Long,
-    val label: String,
+    val labels: List<LabelViewEntity>
 )

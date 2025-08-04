@@ -1,7 +1,7 @@
 package ir.fatemelyasi.note
 
 import android.app.Application
-import ir.fatemelyasi.note.di.applicationModule.ApplicationModule
+import ir.fatemelyasi.note.model.di.applicationModule.ApplicationModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import org.koin.ksp.generated.module
