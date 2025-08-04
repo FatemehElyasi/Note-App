@@ -1,9 +1,11 @@
 package ir.fatemelyasi.note.model.noteLocalRepository
 
+import ir.fatemelyasi.note.model.local.entity.LabelEntity
 import ir.fatemelyasi.note.model.local.entity.NoteEntity
 import kotlinx.coroutines.flow.Flow
 
 interface NoteLocalRepository {
+
     fun getAllNotes(): Flow<List<NoteEntity>>
     fun getNoteById(id: Int): Flow<NoteEntity>?
     suspend fun insertNote(note: NoteEntity)
@@ -13,4 +15,10 @@ interface NoteLocalRepository {
     fun searchNotes(query: String): Flow<List<NoteEntity>>
     fun getFavoriteNotes(): Flow<List<NoteEntity>>
     suspend fun setFavorite(noteId: Long, isFavorite: Boolean)
+
+    fun getAllLabels(): Flow<List<LabelEntity>>
+    fun getByLabelName(label: String): Flow<List<LabelEntity>>
+    suspend fun insertLabel(label: LabelEntity)
+    suspend fun updateLabel(label: LabelEntity)
+    suspend fun deleteLabel(label: LabelEntity)
 }
