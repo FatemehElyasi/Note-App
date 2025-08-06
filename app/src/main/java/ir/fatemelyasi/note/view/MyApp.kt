@@ -1,4 +1,4 @@
-package ir.fatemelyasi.note
+package ir.fatemelyasi.note.view
 
 import android.app.Application
 import ir.fatemelyasi.note.model.di.applicationModule.ApplicationModule

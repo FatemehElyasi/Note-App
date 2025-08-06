@@ -1,4 +1,4 @@
-package ir.fatemelyasi.note.viewEntity
+package ir.fatemelyasi.note.view.viewEntity
 
 import kotlinx.serialization.Serializable
 
