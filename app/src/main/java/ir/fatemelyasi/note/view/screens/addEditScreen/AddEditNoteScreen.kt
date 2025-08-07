@@ -1,14 +1,18 @@
 package ir.fatemelyasi.note.view.screens.addEditScreen
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
@@ -16,20 +20,24 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import ir.fatemelyasi.note.view.utils.LabelChip
+import ir.fatemelyasi.note.view.ui.theme.LocalCustomColors
+import ir.fatemelyasi.note.view.utils.saveImageToInternalStorage
 import org.koin.androidx.compose.koinViewModel
+import java.io.File
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,6 +47,18 @@ fun AddEditNoteScreen(
     viewModel: AddEditNoteViewModel = koinViewModel(),
 ) {
     val state = viewModel.state
+    val context = LocalContext.current
+    val colors = LocalCustomColors.current
+
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            val localPath = saveImageToInternalStorage(context, it)
+            localPath?.let { path -> viewModel.onImageChange(path) }
+        }
+    }
 
     LaunchedEffect(noteId) {
         noteId?.let { viewModel.loadNote(it) }
@@ -47,15 +67,27 @@ fun AddEditNoteScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (noteId == null) "Add Note" else "Edit Note") },
+                title = {
+                    Text(if (noteId == null) "Add Note" else "Edit Note")
+                },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    IconButton(
+                        onClick = { onBack() }
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
                     }
                 },
                 actions = {
-                    IconButton(onClick = { viewModel.saveNote(); onBack() }) {
-                        Icon(Icons.Default.Check, contentDescription = "Save")
+                    IconButton(
+                        onClick = { viewModel.saveNote() }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = "Save"
+                        )
                     }
                 }
             )
@@ -68,11 +100,12 @@ fun AddEditNoteScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-
             OutlinedTextField(
                 value = state.title,
                 onValueChange = viewModel::onTitleChange,
                 label = { Text("Title") },
+                isError = state.error?.contains("Title") == true,
+                supportingText = { Text("${state.title.length + 1} / 200") },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -80,46 +113,42 @@ fun AddEditNoteScreen(
                 value = state.description,
                 onValueChange = viewModel::onDescriptionChange,
                 label = { Text("Description") },
+                isError = state.error?.contains("Description") == true,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(150.dp)
             )
+            if (!state.error.isNullOrBlank()) {
+                Text(
+                    text = state.error,
+                    color = colors.error,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
 
             if (state.image != null) {
                 AsyncImage(
-                    model = state.image,
+                    model = File(state.image),
                     contentDescription = "Selected Image",
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(180.dp)
+                        .height(200.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .border(
+                            2.dp,
+                            colors.outline,
+                            RoundedCornerShape(12.dp))
                 )
             } else {
-                Button(onClick = {
-                /* image picker */
-                }) {
+                Button(
+                    onClick = { imagePickerLauncher.launch("image/*") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp)
+                ) {
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text("Add Image")
-                }
-            }
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("Favorite:", fontWeight = FontWeight.Bold)
-                Switch(
-                    checked = state.isFavorite,
-                    onCheckedChange = { viewModel.onFavoriteToggle() }
-                )
-            }
-
-            Text("Labels:", fontWeight = FontWeight.Bold)
-
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(state.labels) { label ->
-                    LabelChip(
-                        label = label,
-                        onClick = { viewModel.onLabelToggle(label) },
-                        isSelected = true
-                    )
                 }
             }
         }

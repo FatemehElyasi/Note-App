@@ -5,11 +5,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import ir.fatemelyasi.note.model.local.entity.CrossEntity
 import ir.fatemelyasi.note.model.local.entity.NoteEntity
-import ir.fatemelyasi.note.model.local.mapper.mapToNoteViewEntity
 import ir.fatemelyasi.note.model.noteLocalRepository.NoteLocalRepository
-import ir.fatemelyasi.note.view.viewEntity.LabelViewEntity
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
@@ -24,33 +22,10 @@ class AddEditNoteViewModel(
 
     private var currentNoteId: Int? = null
 
-    fun loadNote(noteId: Int) {
-        viewModelScope.launch {
-            try {
-                val notes = repository.getAllNotes().first()
-                val labels = repository.getAllLabels().first()
-                val crossRefs = repository.getCrossRefs().first()
-
-                val mappedNotes = mapToNoteViewEntity(notes, labels, crossRefs)
-                val target = mappedNotes.find { it.id == noteId } ?: return@launch
-
-                currentNoteId = target.id
-
-                state = state.copy(
-                    title = target.title,
-                    description = target.description ?: "",
-                    image = target.image,
-                    labels = target.labels,
-                    isFavorite = target.isFavorite
-                )
-            } catch (e: Exception) {
-                state = state.copy(error = e.localizedMessage)
-            }
-        }
-    }
-
     fun onTitleChange(newTitle: String) {
-        state = state.copy(title = newTitle)
+        if (newTitle.length <= 200) {
+            state = state.copy(title = newTitle, error = null)
+        }
     }
 
     fun onDescriptionChange(newDesc: String) {
@@ -61,24 +36,47 @@ class AddEditNoteViewModel(
         state = state.copy(image = newImage)
     }
 
-    fun onLabelToggle(label: LabelViewEntity) {
-        val exists = state.labels.any { it.labelId == label.labelId }
-        val updatedLabels = if (exists) {
-            state.labels.filterNot { it.labelId == label.labelId }
-        } else {
-            state.labels + label
-        }
-        state = state.copy(labels = updatedLabels)
-    }
+    fun loadNote(noteId: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val note = repository.getAllNotes().first().find {
+                    it.noteId == noteId
+                }
+                if (note != null) {
 
-    fun onFavoriteToggle() {
-        state = state.copy(isFavorite = !state.isFavorite)
+                    currentNoteId = note.noteId
+
+                    state = state.copy(
+                        title = note.title ?: "",
+                        description = note.description ?: "",
+                        image = note.image,
+                        isFavorite = note.isFavorite ?: false,
+                        createdAt = note.createdAt
+                    )
+                }
+            } catch (e: Exception) {
+                state = state.copy(
+                    error = e.localizedMessage
+                )
+            }
+        }
     }
 
     fun saveNote() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 val now = System.currentTimeMillis()
+
+                // Validate
+                if (state.title.trim().isEmpty()) {
+                    state = state.copy(error = "Title cannot be empty.")
+                    return@launch
+                }
+
+                if (state.description.trim().isEmpty()) {
+                    state = state.copy(error = "Description cannot be empty.")
+                    return@launch
+                }
 
                 val isEditing = currentNoteId != null
 
@@ -92,30 +90,13 @@ class AddEditNoteViewModel(
                     updatedAt = now
                 )
 
-                val finalNoteId = if (isEditing) {
-                    repository.updateNote(note)
-                    currentNoteId!!
-                } else {
-                    repository.insertNote(note).toInt() ?: 0
-                }
-
-
                 if (isEditing) {
-                    repository.deleteCrossRefsForNote(finalNoteId)
+                    repository.updateNote(note)
+                } else {
+                    repository.insertNote(note)
                 }
-
-                // درج CrossEntity های جدید
-                val crossRefs = state.labels.mapNotNull { label ->
-                    val noteId = finalNoteId
-                    val labelId = label.labelId
-                    if (noteId != null && labelId != null) {
-                        CrossEntity(noteId = noteId, labelId = labelId)
-                    } else null
-                }
-                repository.insertCrossRefs(crossRefs)
 
                 state = state.copy(isSaved = true)
-
             } catch (e: Exception) {
                 state = state.copy(error = e.localizedMessage)
             }

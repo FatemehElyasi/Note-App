@@ -61,7 +61,7 @@ class NoteLocalDataSourceImpl(
     override fun getByLabelName(label: String): Flow<List<LabelEntity>> {
         return labelDao.getByLabelName(label = label)
     }
-    override suspend fun insertLabel(label: LabelEntity) {
+    override suspend fun insertLabel(label: LabelEntity): Long {
         return labelDao.insertLabel(label = label)
     }
     override suspend fun updateLabel(label: LabelEntity) {

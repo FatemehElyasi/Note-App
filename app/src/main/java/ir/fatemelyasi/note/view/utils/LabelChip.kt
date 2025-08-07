@@ -23,6 +23,7 @@ import ir.fatemelyasi.note.view.viewEntity.LabelViewEntity
 @Composable
 fun LabelChip(
     label: LabelViewEntity,
+    labelId: Int? = null,
     modifier: Modifier = Modifier,
     isSelected: Boolean = false,
     onClick: (() -> Unit)? = null

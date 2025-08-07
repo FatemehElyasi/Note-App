@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface LabelDao {
     @Insert
-    suspend fun insertLabel(label: LabelEntity)
+    suspend fun insertLabel(label: LabelEntity): Long
 
     @Query("SELECT * FROM label_table")
     fun getAllLabels(): Flow<List<LabelEntity>>

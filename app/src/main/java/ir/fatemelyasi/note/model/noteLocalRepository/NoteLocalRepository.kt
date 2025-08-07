@@ -24,7 +24,7 @@ interface NoteLocalRepository {
 
     fun getAllLabels(): Flow<List<LabelEntity>>
     fun getByLabelName(label: String): Flow<List<LabelEntity>>
-    suspend fun insertLabel(label: LabelEntity)
+    suspend fun insertLabel(label: LabelEntity): Long
     suspend fun updateLabel(label: LabelEntity)
     suspend fun deleteLabel(label: LabelEntity)
 }
