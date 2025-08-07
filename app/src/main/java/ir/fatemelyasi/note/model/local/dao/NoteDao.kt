@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import ir.fatemelyasi.note.model.local.entity.CrossEntity
 import ir.fatemelyasi.note.model.local.entity.NoteEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -19,7 +20,7 @@ interface NoteDao {
     fun getNoteById(noteId: Int): Flow<NoteEntity>?
 
     @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
-    suspend fun insertNote(note: NoteEntity)
+    suspend fun insertNote(note: NoteEntity): Long
 
     @Update
     suspend fun updateNote(note: NoteEntity)
@@ -38,4 +39,17 @@ interface NoteDao {
 
     @Query("UPDATE note_table SET isFavorite = :isFavorite WHERE noteId = :noteId")
     suspend fun setFavorite(noteId: Long, isFavorite: Boolean)
+
+    @Query("SELECT * FROM note_label_join")
+    fun getAllCrossRefs(): Flow<List<CrossEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertCrossRef(cross: CrossEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertCrossRefs(crossList: List<CrossEntity>)
+
+    @Query("DELETE FROM note_label_join WHERE noteId = :noteId")
+    suspend fun deleteCrossRefsForNote(noteId: Int)
+
 }

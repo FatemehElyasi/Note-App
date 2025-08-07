@@ -1,5 +1,6 @@
 package ir.fatemelyasi.note.model.local.entity
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
@@ -24,6 +25,8 @@ import androidx.room.Index
     indices = [Index(value = ["noteId"]), Index(value = ["labelId"])]
 )
 data class CrossEntity(
+    @ColumnInfo("noteId")
     val noteId: Int,
+    @ColumnInfo("labelId")
     val labelId: Int
 )
