@@ -1,5 +1,6 @@
 package ir.fatemelyasi.note.model.noteLocalRepository
 
+import ir.fatemelyasi.note.model.local.entity.CrossEntity
 import ir.fatemelyasi.note.model.local.entity.LabelEntity
 import ir.fatemelyasi.note.model.local.entity.NoteEntity
 import ir.fatemelyasi.note.model.noteLocalDataSource.NoteLocalDataSource
@@ -10,13 +11,27 @@ import org.koin.core.annotation.Single
 class NoteLocalRepositoryImpl(
     private val noteLocalDataSource: NoteLocalDataSource
 ) : NoteLocalRepository {
+
+    override fun getCrossRefs(): Flow<List<CrossEntity>> {
+        return noteLocalDataSource.getCrossRefs()
+    }
+    override suspend fun insertCrossRef(cross: CrossEntity) {
+        return noteLocalDataSource.insertCrossRef(cross)
+    }
+    override suspend fun insertCrossRefs(crossList: List<CrossEntity>) {
+        return  noteLocalDataSource.insertCrossRefs(crossList)
+    }
+    override suspend fun deleteCrossRefsForNote(noteId: Int) {
+        return noteLocalDataSource.deleteCrossRefsForNote(noteId)
+    }
+
     override fun getAllNotes(): Flow<List<NoteEntity>> {
         return noteLocalDataSource.getAllNotes()
     }
     override fun getNoteById(id: Int): Flow<NoteEntity>? {
         return noteLocalDataSource.getNoteById(id)
     }
-    override suspend fun insertNote(note: NoteEntity) {
+    override suspend fun insertNote(note: NoteEntity): Long {
         return noteLocalDataSource.insertNote(note)
     }
     override suspend fun updateNote(note: NoteEntity) {
@@ -37,7 +52,6 @@ class NoteLocalRepositoryImpl(
     override suspend fun setFavorite(noteId: Long, isFavorite: Boolean) {
         return noteLocalDataSource.setFavorite(noteId, isFavorite)
     }
-
 
     override fun getAllLabels(): Flow<List<LabelEntity>> {
         return noteLocalDataSource.getAllLabels()

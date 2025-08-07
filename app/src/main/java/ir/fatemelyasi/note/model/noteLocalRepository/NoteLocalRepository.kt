@@ -1,14 +1,20 @@
 package ir.fatemelyasi.note.model.noteLocalRepository
 
+import ir.fatemelyasi.note.model.local.entity.CrossEntity
 import ir.fatemelyasi.note.model.local.entity.LabelEntity
 import ir.fatemelyasi.note.model.local.entity.NoteEntity
 import kotlinx.coroutines.flow.Flow
 
 interface NoteLocalRepository {
 
+    fun getCrossRefs(): Flow<List<CrossEntity>>
+    suspend fun insertCrossRef(cross: CrossEntity)
+    suspend fun insertCrossRefs(crossList: List<CrossEntity>)
+    suspend fun deleteCrossRefsForNote(noteId: Int)
+
     fun getAllNotes(): Flow<List<NoteEntity>>
     fun getNoteById(id: Int): Flow<NoteEntity>?
-    suspend fun insertNote(note: NoteEntity)
+    suspend fun insertNote(note: NoteEntity): Long
     suspend fun updateNote(note: NoteEntity)
     suspend fun deleteNote(note: NoteEntity)
     suspend fun deleteAll()
