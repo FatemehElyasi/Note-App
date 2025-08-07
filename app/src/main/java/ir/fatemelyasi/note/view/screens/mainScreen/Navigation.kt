@@ -1,5 +1,6 @@
 package ir.fatemelyasi.note.view.screens.mainScreen
 
+import ir.fatemelyasi.note.view.screens.homeListScreen.NoteListViewModel
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -9,6 +10,7 @@ import ir.fatemelyasi.note.view.screens.addEditScreen.AddEditNoteScreen
 import ir.fatemelyasi.note.view.screens.addEditScreen.AddEditNoteViewModel
 import ir.fatemelyasi.note.view.screens.detailScreen.NoteDetailScreen
 import ir.fatemelyasi.note.view.screens.detailScreen.NoteDetailViewModel
+import ir.fatemelyasi.note.view.screens.homeListScreen.HomeNoteListScreen
 import ir.fatemelyasi.note.view.utils.MyScreens
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -18,7 +20,7 @@ fun Navigation() {
 
     NavHost(
         navController = navController,
-        startDestination = MyScreens.AddEditNoteScreen::class
+        startDestination = MyScreens.NoteListScreen::class
     ) {
         composable<MyScreens.AddEditNoteScreen> { backStackEntry ->
             val dataModel = backStackEntry.toRoute<MyScreens.AddEditNoteScreen>()
@@ -46,6 +48,22 @@ fun Navigation() {
                 },
                 onBack = { navController.popBackStack() },
                 viewModel = viewModel,
+            )
+        }
+        composable<MyScreens.NoteListScreen> { backStackEntry ->
+            val viewModel: NoteListViewModel = koinViewModel()
+            HomeNoteListScreen(
+                onNoteClicked = { note ->
+                    navController.navigate(
+                        MyScreens.NoteDetailScreen(noteId = note.id ?: -1)
+                    )
+
+                },
+                onAddNoteClicked = {
+                    navController.navigate(MyScreens.AddEditNoteScreen())
+                },
+                onSearchClicked = {},
+                viewModel = viewModel
             )
         }
     }
