@@ -1,4 +1,4 @@
-package ir.fatemelyasi.note.view.screens.homeNoteListScreen
+package ir.fatemelyasi.note.view.screens.homeListScreen
 
 import ir.fatemelyasi.note.view.viewEntity.NoteViewEntity
 

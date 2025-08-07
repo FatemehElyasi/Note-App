@@ -18,6 +18,7 @@ interface NoteLocalDataSource {
     suspend fun insertNote(note: NoteEntity) : Long
     suspend fun updateNote(note: NoteEntity)
     suspend fun deleteNote(note: NoteEntity)
+    suspend fun deleteNoteById(noteId: Int)
     suspend fun deleteAll()
     fun searchNotes(query: String): Flow<List<NoteEntity>>
     fun getFavoriteNotes(): Flow<List<NoteEntity>>

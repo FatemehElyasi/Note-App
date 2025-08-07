@@ -7,6 +7,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import ir.fatemelyasi.note.view.screens.addEditScreen.AddEditNoteScreen
 import ir.fatemelyasi.note.view.screens.addEditScreen.AddEditNoteViewModel
+import ir.fatemelyasi.note.view.screens.detailScreen.NoteDetailScreen
+import ir.fatemelyasi.note.view.screens.detailScreen.NoteDetailViewModel
 import ir.fatemelyasi.note.view.utils.MyScreens
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -28,5 +30,25 @@ fun Navigation() {
                 onBack = { navController.popBackStack() }
             )
         }
+        composable<MyScreens.NoteDetailScreen> { backStackEntry ->
+            val dataModel = backStackEntry.toRoute<MyScreens.NoteDetailScreen>()
+            val viewModel: NoteDetailViewModel = koinViewModel()
+
+            NoteDetailScreen(
+                noteId = dataModel.noteId,
+                onEditClick = {
+                    navController
+                        .navigate(
+                            MyScreens.AddEditNoteScreen(
+                                noteId = dataModel.noteId
+                            )
+                        )
+                },
+                onBack = { navController.popBackStack() },
+                viewModel = viewModel,
+            )
+        }
     }
 }
+
+
