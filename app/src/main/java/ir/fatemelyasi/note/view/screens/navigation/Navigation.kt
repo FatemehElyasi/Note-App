@@ -1,4 +1,4 @@
-package ir.fatemelyasi.note.view.screens.mainScreen
+package ir.fatemelyasi.note.view.screens.navigation
 
 import ir.fatemelyasi.note.view.screens.homeListScreen.NoteListViewModel
 import androidx.compose.runtime.Composable
@@ -11,7 +11,7 @@ import ir.fatemelyasi.note.view.screens.addEditScreen.AddEditNoteViewModel
 import ir.fatemelyasi.note.view.screens.detailScreen.NoteDetailScreen
 import ir.fatemelyasi.note.view.screens.detailScreen.NoteDetailViewModel
 import ir.fatemelyasi.note.view.screens.homeListScreen.HomeNoteListScreen
-import ir.fatemelyasi.note.view.utils.MyScreens
+import ir.fatemelyasi.note.view.utils.myScreens.MyScreens
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable

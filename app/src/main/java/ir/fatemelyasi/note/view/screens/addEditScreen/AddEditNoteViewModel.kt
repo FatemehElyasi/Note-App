@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ir.fatemelyasi.note.model.local.entity.NoteEntity
 import ir.fatemelyasi.note.model.noteLocalRepository.NoteLocalRepository
+import ir.fatemelyasi.note.view.utils.states.AddEditNoteState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch

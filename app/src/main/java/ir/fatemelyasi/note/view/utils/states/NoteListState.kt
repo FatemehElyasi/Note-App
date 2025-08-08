@@ -1,9 +1,9 @@
-package ir.fatemelyasi.note.view.screens.detailScreen
+package ir.fatemelyasi.note.view.utils.states
 
 import ir.fatemelyasi.note.view.viewEntity.NoteViewEntity
 
-data class NoteDetailState(
+data class NoteListState(
     val isLoading: Boolean = false,
-    val note: NoteViewEntity? = null,
+    val notes: List<NoteViewEntity> = emptyList(),
     val error: String? = null
 )

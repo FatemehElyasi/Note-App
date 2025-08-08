@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ir.fatemelyasi.note.model.local.mapper.mapToNoteViewEntity
 import ir.fatemelyasi.note.model.noteLocalRepository.NoteLocalRepository
+import ir.fatemelyasi.note.view.utils.states.NoteListState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

@@ -1,4 +1,4 @@
-package ir.fatemelyasi.note.view.screens.addEditScreen
+package ir.fatemelyasi.note.view.utils.states
 
 import ir.fatemelyasi.note.view.viewEntity.LabelViewEntity
 

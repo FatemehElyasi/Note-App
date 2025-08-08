@@ -1,4 +1,4 @@
-package ir.fatemelyasi.note.view.utils
+package ir.fatemelyasi.note.view.utils.myScreens
 
 import kotlinx.serialization.Serializable
 
