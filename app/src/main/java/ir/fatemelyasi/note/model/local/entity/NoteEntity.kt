@@ -9,7 +9,7 @@ data class NoteEntity(
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "noteId")
-    val noteId: Int?,
+    val noteId: Long? = 0L,
 
     @ColumnInfo(name = "title")
     val title: String?,
