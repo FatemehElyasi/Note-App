@@ -70,7 +70,7 @@ class NoteLocalRepositoryImpl(
        return noteLocalDataSource.replaceCrossRefsForNote(noteId = noteId, newCrossRefs = newCrossRefs)
     }
     override suspend fun updateNoteWithLabels(note: NoteEntity, newCrossRefs: List<CrossEntity>) {
-        TODO("Not yet implemented")
+       return noteLocalDataSource.updateNoteWithLabels(note = note, newCrossRefs = newCrossRefs)
     }
 
 }
