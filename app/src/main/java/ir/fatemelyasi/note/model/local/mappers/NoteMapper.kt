@@ -3,8 +3,10 @@ package ir.fatemelyasi.note.model.local.mappers
 import ir.fatemelyasi.note.model.local.entity.LabelEntity
 import ir.fatemelyasi.note.model.local.entity.NoteEntity
 import ir.fatemelyasi.note.model.local.entity.NoteWithLabels
-import ir.fatemelyasi.note.viewEntity.NoteViewEntity
+import ir.fatemelyasi.note.view.utils.toFormattedDate
+import ir.fatemelyasi.note.view.viewEntity.NoteViewEntity
 
+//DB -> UI
 fun NoteWithLabels.toViewEntity(): NoteViewEntity {
     return note.toViewEntity(labels)
 }
