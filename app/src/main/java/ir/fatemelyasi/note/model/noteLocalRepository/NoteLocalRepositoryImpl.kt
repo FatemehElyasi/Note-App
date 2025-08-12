@@ -29,7 +29,7 @@ class NoteLocalRepositoryImpl(
         return noteLocalDataSource.deleteNote(note)
     }
 
-    override suspend fun deleteNoteById(noteId: Int) {
+    override suspend fun deleteNoteById(noteId: Long) {
         return noteLocalDataSource.deleteNoteById(noteId)
     }
 

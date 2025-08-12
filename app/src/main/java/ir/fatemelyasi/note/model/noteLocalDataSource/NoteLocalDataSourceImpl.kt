@@ -31,7 +31,7 @@ class NoteLocalDataSourceImpl(
         return noteDao.deleteNote(note = note)
     }
 
-    override suspend fun deleteNoteById(noteId: Int) {
+    override suspend fun deleteNoteById(noteId: Long) {
         return noteDao.deleteNoteById(noteId = noteId)
     }
 

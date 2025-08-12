@@ -10,7 +10,7 @@ sealed class MyScreens() {
 
     @Serializable
     data class NoteDetailScreen(
-        val noteId: Int,
+        val noteId: Long,
     ) : MyScreens()
 
     @Serializable
