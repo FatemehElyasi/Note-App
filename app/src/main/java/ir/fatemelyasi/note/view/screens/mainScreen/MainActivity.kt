@@ -1,27 +1,24 @@
-package ir.fatemelyasi.note
+package ir.fatemelyasi.note.view.screens.mainScreen
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
-import ir.fatemelyasi.note.ui.theme.NoteTheme
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Modifier
+import ir.fatemelyasi.note.view.ui.theme.NoteTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+//        enableEdgeToEdge()
         setContent {
             NoteTheme {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    Navigation()
+                }
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    NoteTheme {
     }
 }
