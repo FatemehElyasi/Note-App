@@ -41,8 +41,8 @@ import java.io.File
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NoteDetailScreen(
-    noteId: Int,
-    onEditClick: (noteId: Int) -> Unit,
+    noteId: Long,
+    onEditClick: (noteId: Long) -> Unit,
     onBack: () -> Unit,
     viewModel: NoteDetailViewModel = koinViewModel(),
 ) {
@@ -131,7 +131,7 @@ fun NoteDetailScreen(
                         }
 
                         Text(
-                            text = note.title,
+                            text = note.title ?: "",
                             style = MaterialTheme.typography.headlineSmall
                         )
 

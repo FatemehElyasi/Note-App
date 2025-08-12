@@ -13,9 +13,6 @@ interface LabelDao {
     @Insert
     suspend fun insertLabel(label: LabelEntity): Long
 
-    @Query("SELECT * FROM label_table")
-    fun getAllLabels(): Flow<List<LabelEntity>>
-
     @Query("SELECT * FROM label_table WHERE labelName = :label")
     fun getByLabelName(label: String): Flow<List<LabelEntity>>
 
