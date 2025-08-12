@@ -10,7 +10,7 @@ data class NoteViewEntity(
     val image: String?,
     val date: String,
     val isFavorite: Boolean = false,
-    val createdAt: Long,
-    val updatedAt: Long,
+    val createdAt: Long?,
+    val updatedAt: Long?,
     val labels: List<LabelViewEntity>
 )

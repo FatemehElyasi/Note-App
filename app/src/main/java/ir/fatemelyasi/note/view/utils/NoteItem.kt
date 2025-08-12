@@ -75,7 +75,7 @@ fun NoteItem(
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
-                    text = "Updated: ${note.updatedAt}",
+                    text = "Date: ${note.updatedAt?.toFormattedDate()}",
                     style = typography.titleSmall
                 )
             }

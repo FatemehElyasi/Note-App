@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -82,19 +83,28 @@ fun HomeNoteListScreen(
                 }
 
                 else -> {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 16.dp)
-                    ) {
-                        items(state.notes) { note ->
-                            NoteItem(
-                                note = note,
-                                onClick = { onNoteClicked(note) })
-                            Spacer(
-                                modifier = Modifier
-                                    .height(12.dp)
-                            )
+                    if (state.notes.isEmpty()) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "No notes available.",
+                                style = MaterialTheme.typography.bodyLarge)
+                        }
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 16.dp)
+                        ) {
+                            items(state.notes) { note ->
+                                NoteItem(
+                                    note = note,
+                                    onClick = { onNoteClicked(note) }
+                                )
+                                Spacer(modifier = Modifier.height(12.dp))
+                            }
                         }
                     }
                 }
@@ -102,5 +112,3 @@ fun HomeNoteListScreen(
         }
     }
 }
-
-
