@@ -1,4 +1,4 @@
-package ir.fatemelyasi.note.ui.theme
+package ir.fatemelyasi.note.view.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
