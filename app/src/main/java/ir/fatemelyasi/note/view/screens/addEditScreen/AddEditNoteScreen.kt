@@ -23,10 +23,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -34,7 +37,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import ir.fatemelyasi.note.view.ui.theme.LocalCustomColors
+import ir.fatemelyasi.note.view.utils.MessageSnackBarHost
 import ir.fatemelyasi.note.view.utils.saveImageToInternalStorage
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import java.io.File
 
@@ -42,14 +47,15 @@ import java.io.File
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEditNoteScreen(
-    noteId: Int?,
+    noteId: Long?,
     onBack: () -> Unit,
     viewModel: AddEditNoteViewModel = koinViewModel(),
 ) {
     val state = viewModel.state
+    val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     val colors = LocalCustomColors.current
-
+    val snackBarHostState = remember { SnackbarHostState() }
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -61,10 +67,13 @@ fun AddEditNoteScreen(
     }
 
     LaunchedEffect(noteId) {
-        noteId?.let { viewModel.loadNote(it) }
+        noteId?.let {
+            viewModel.loadNote(noteId)
+        }
     }
 
     Scaffold(
+        snackbarHost = { MessageSnackBarHost(snackBarHostState) },
         topBar = {
             TopAppBar(
                 title = {
@@ -82,7 +91,17 @@ fun AddEditNoteScreen(
                 },
                 actions = {
                     IconButton(
-                        onClick = { viewModel.saveNote() }
+                        onClick = {
+                            viewModel.saveNote(
+                                onSuccess = { onBack() },
+                                onError = { message ->
+                                    coroutineScope.launch {
+                                        snackBarHostState.showSnackbar(message)
+                                    }
+                                }
+                            )
+                        }
+
                     ) {
                         Icon(
                             imageVector = Icons.Default.Check,
@@ -138,7 +157,8 @@ fun AddEditNoteScreen(
                         .border(
                             2.dp,
                             colors.outline,
-                            RoundedCornerShape(12.dp))
+                            RoundedCornerShape(12.dp)
+                        )
                 )
             } else {
                 Button(
