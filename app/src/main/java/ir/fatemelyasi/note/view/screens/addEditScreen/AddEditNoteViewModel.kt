@@ -10,6 +10,7 @@ import ir.fatemelyasi.note.model.noteLocalRepository.NoteLocalRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel
@@ -20,61 +21,79 @@ class AddEditNoteViewModel(
     var state by mutableStateOf(AddEditNoteState())
         private set
 
-    private var currentNoteId: Int? = null
+    private var currentNoteId: Long? = null
 
     fun onTitleChange(newTitle: String) {
         if (newTitle.length <= 200) {
-            state = state.copy(title = newTitle, error = null)
+            state = state.copy(
+                title = newTitle,
+                error = null
+            )
         }
     }
 
     fun onDescriptionChange(newDesc: String) {
-        state = state.copy(description = newDesc)
+        state = state.copy(
+            description = newDesc
+        )
     }
 
     fun onImageChange(newImage: String?) {
-        state = state.copy(image = newImage)
+        state = state.copy(
+            image = newImage
+        )
     }
 
-    fun loadNote(noteId: Int) {
+    fun loadNote(noteId: Long) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val note = repository.getAllNotes().first().find {
-                    it.noteId == noteId
-                }
-                if (note != null) {
+                val note = repository.getNoteById(noteId).first()
+                note.let {
+                    currentNoteId = it.noteId
 
-                    currentNoteId = note.noteId
-
-                    state = state.copy(
-                        title = note.title ?: "",
-                        description = note.description ?: "",
-                        image = note.image,
-                        isFavorite = note.isFavorite ?: false,
-                        createdAt = note.createdAt
-                    )
+                    withContext(Dispatchers.Main) {
+                        state = state.copy(
+                            title = it.title ?: "",
+                            description = it.description ?: "",
+                            image = it.image,
+                            isFavorite = it.isFavorite == true,
+                            createdAt = it.createdAt
+                        )
+                    }
                 }
             } catch (e: Exception) {
-                state = state.copy(
-                    error = e.localizedMessage
-                )
+                withContext(Dispatchers.Main) {
+                    state = state.copy(
+                        error = e.localizedMessage
+                    )
+                }
             }
         }
     }
 
-    fun saveNote() {
+    fun saveNote(
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val now = System.currentTimeMillis()
 
-                // Validate
                 if (state.title.trim().isEmpty()) {
-                    state = state.copy(error = "Title cannot be empty.")
+                    withContext(Dispatchers.Main) {
+                        state = state.copy(
+                            error = "Title cannot be empty."
+                        )
+                    }
                     return@launch
                 }
 
                 if (state.description.trim().isEmpty()) {
-                    state = state.copy(error = "Description cannot be empty.")
+                    withContext(Dispatchers.Main) {
+                        state = state.copy(
+                            error = "Description cannot be empty."
+                        )
+                    }
                     return@launch
                 }
 
@@ -96,10 +115,14 @@ class AddEditNoteViewModel(
                     repository.insertNote(note)
                 }
 
-                state = state.copy(isSaved = true)
+                withContext(Dispatchers.Main) {
+                    state = state.copy(isSaved = true)
+                    onSuccess()
+                }
             } catch (e: Exception) {
-                state = state.copy(error = e.localizedMessage)
+                onError(e.localizedMessage ?: "Unknown error")
             }
         }
     }
 }
+

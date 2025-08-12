@@ -15,7 +15,7 @@ sealed class MyScreens() {
 
     @Serializable
     data class AddEditNoteScreen(
-        val noteId: Int? = null,
+        val noteId: Long? = null,
     ) : MyScreens()
 
 }
