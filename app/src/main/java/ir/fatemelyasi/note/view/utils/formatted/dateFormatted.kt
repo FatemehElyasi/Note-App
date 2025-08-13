@@ -1,4 +1,4 @@
-package ir.fatemelyasi.note.view.utils
+package ir.fatemelyasi.note.view.utils.formatted
 
 import java.text.SimpleDateFormat
 import java.util.Date

@@ -5,9 +5,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import ir.fatemelyasi.note.model.local.entity.CrossEntity
 import ir.fatemelyasi.note.model.local.entity.NoteEntity
+import ir.fatemelyasi.note.model.local.mappers.toViewEntity
 import ir.fatemelyasi.note.model.noteLocalRepository.NoteLocalRepository
 import ir.fatemelyasi.note.view.utils.states.AddEditNoteState
+import ir.fatemelyasi.note.view.viewEntity.LabelViewEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -45,37 +48,46 @@ class AddEditNoteViewModel(
         )
     }
 
+    fun onLabelToggle(label: LabelViewEntity) {
+        val current = state.labels.toMutableList()
+        if (current.contains(label)) {
+            current.remove(label)
+        } else {
+            current.add(label)
+        }
+        state = state.copy(labels = current)
+    }
+
     fun loadNote(noteId: Long) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val note = repository.getNoteById(noteId).first()
-                note.let {
-                    currentNoteId = it.noteId
+                val noteWithLabels = repository.getNotesWithLabels()
+                    .first()
+                    .firstOrNull { it.note.noteId == noteId }
+
+                noteWithLabels?.let { it ->
+                    currentNoteId = it.note.noteId
 
                     withContext(Dispatchers.Main) {
                         state = state.copy(
-                            title = it.title ?: "",
-                            description = it.description ?: "",
-                            image = it.image,
-                            isFavorite = it.isFavorite == true,
-                            createdAt = it.createdAt
+                            title = it.note.title ?: "",
+                            description = it.note.description ?: "",
+                            image = it.note.image,
+                            isFavorite = it.note.isFavorite == true,
+                            createdAt = it.note.createdAt,
+                            labels = it.labels.map { it.toViewEntity() }
                         )
                     }
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    state = state.copy(
-                        error = e.localizedMessage
-                    )
+                    state = state.copy(error = e.localizedMessage)
                 }
             }
         }
     }
 
-    fun saveNote(
-        onSuccess: () -> Unit,
-        onError: (String) -> Unit
-    ) {
+    fun saveNote(onSuccess: () -> Unit, onError: (String) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val now = System.currentTimeMillis()
@@ -99,7 +111,6 @@ class AddEditNoteViewModel(
                 }
 
                 val isEditing = currentNoteId != null
-
                 val note = NoteEntity(
                     noteId = currentNoteId,
                     title = state.title,
@@ -110,11 +121,20 @@ class AddEditNoteViewModel(
                     updatedAt = now
                 )
 
-                if (isEditing) {
+                val noteId = if (isEditing) {
                     repository.updateNote(note)
+                    currentNoteId!!
                 } else {
                     repository.insertNote(note)
                 }
+
+
+                repository.replaceCrossRefsForNote(
+                    noteId = noteId,
+                    newCrossRefs = state.labels.map {
+                        CrossEntity(noteId.toInt(), it.labelId ?: 0)
+                    }
+                )
 
                 withContext(Dispatchers.Main) {
                     state = state.copy(isSaved = true)

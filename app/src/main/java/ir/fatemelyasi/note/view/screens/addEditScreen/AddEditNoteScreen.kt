@@ -3,9 +3,12 @@ package ir.fatemelyasi.note.view.screens.addEditScreen
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,11 +19,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.typography
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -37,25 +41,29 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import ir.fatemelyasi.note.view.ui.theme.LocalCustomColors
+import ir.fatemelyasi.note.view.utils.LabelChip
 import ir.fatemelyasi.note.view.utils.MessageSnackBarHost
 import ir.fatemelyasi.note.view.utils.saveImageToInternalStorage
+import ir.fatemelyasi.note.view.viewEntity.LabelViewEntity
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import java.io.File
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun AddEditNoteScreen(
     noteId: Long?,
     onBack: () -> Unit,
+    availableLabels: List<LabelViewEntity>,
     viewModel: AddEditNoteViewModel = koinViewModel(),
 ) {
     val state = viewModel.state
     val coroutineScope = rememberCoroutineScope()
+    val snackBarHostState = remember { SnackbarHostState() }
+
     val context = LocalContext.current
     val colors = LocalCustomColors.current
-    val snackBarHostState = remember { SnackbarHostState() }
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -141,7 +149,7 @@ fun AddEditNoteScreen(
                 Text(
                     text = state.error,
                     color = colors.error,
-                    style = MaterialTheme.typography.bodySmall
+                    style =typography.bodySmall
                 )
             }
 
@@ -161,14 +169,38 @@ fun AddEditNoteScreen(
                         )
                 )
             } else {
-                Button(
+                OutlinedButton(
                     onClick = { imagePickerLauncher.launch("image/*") },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(50.dp)
+                        .height(50.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = colors.background,
+                        contentColor = colors.onBackground
+                    ),
+                    border = BorderStroke(1.dp, colors.outline)
                 ) {
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Add Image")
+                    Text(text = "Add Image")
+                }}
+
+            Text(
+                text = "Select Labels:",
+                style = typography.titleMedium
+            )
+
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                availableLabels.forEach { label ->
+                    val isSelected = state.labels.contains(label)
+
+                    LabelChip(
+                        label = label,
+                        isSelected = isSelected,
+                        onClick = { viewModel.onLabelToggle(label) }
+                    )
                 }
             }
         }

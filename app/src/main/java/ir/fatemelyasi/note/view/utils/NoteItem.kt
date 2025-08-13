@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import ir.fatemelyasi.note.view.ui.theme.LocalCustomColors
 import ir.fatemelyasi.note.view.ui.theme.LocalCustomTypography
+import ir.fatemelyasi.note.view.utils.formatted.toFormattedDate
 import ir.fatemelyasi.note.view.viewEntity.NoteViewEntity
 
 @Composable
