@@ -1,4 +1,4 @@
-package ir.fatemelyasi.note.ui.theme
+package ir.fatemelyasi.note.view.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
@@ -20,4 +20,8 @@ val DarkGrayBackground = Color(0xFF212121)
 val Red = Color(0xFFDF1818)
 val Yellow = Color(0xFFFB8C00)
 val Green = Color(0xFF43A047)
-
+val Blue = Color(0xFF2196F3)
+val Cyan = Color(0xFF00BCD4)
+val Indigo = Color(0xFF3F51B5)
+val Pink = Color(0xFFE91E63)
+val Purple = Color(0xFF9C27B0)

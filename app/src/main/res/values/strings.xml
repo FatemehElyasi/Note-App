@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">Note</string>
+
+    <string name="label_work">Work</string>
+    <string name="label_personal">Personal</string>
+    <string name="label_ideas">Ideas</string>
+    <string name="label_university">University</string>
+    <string name="label_resume">Resume</string>
+    <string name="label_in_process">In Process</string>
+    <string name="label_force">Force</string>
+
 </resources>
