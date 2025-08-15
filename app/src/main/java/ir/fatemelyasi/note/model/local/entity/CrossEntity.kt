@@ -26,7 +26,7 @@ import androidx.room.Index
 )
 data class CrossEntity(
     @ColumnInfo("noteId")
-    val noteId: Int,
+    val noteId: Long,
     @ColumnInfo("labelId")
-    val labelId: Int
+    val labelId: Long
 )

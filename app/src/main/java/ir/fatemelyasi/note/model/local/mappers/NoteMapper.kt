@@ -6,34 +6,30 @@ import ir.fatemelyasi.note.model.local.entity.NoteWithLabels
 import ir.fatemelyasi.note.view.utils.toFormattedDate
 import ir.fatemelyasi.note.view.viewEntity.NoteViewEntity
 
-//DB -> UI
-fun NoteWithLabels.toViewEntity(): NoteViewEntity {
-    return note.toViewEntity(labels)
-}
-
-//DB -> UI
+// ---------- NoteEntity -> NoteViewEntity (DB -> UI)
 fun NoteEntity.toViewEntity(labels: List<LabelEntity> = emptyList()): NoteViewEntity {
     return NoteViewEntity(
         id = noteId,
         title = title.orEmpty(),
         description = description.orEmpty(),
         image = image,
-        isFavorite = isFavorite ?: false,
         createdAt = createdAt ?: 0L,
         updatedAt = updatedAt ?: 0L,
         date = (updatedAt ?: 0L).toFormattedDate(),
+        isFavorite = isFavorite,
         labels = labels.map { it.toViewEntity() }
     )
 }
-//UI -> DB
+
+// ---------- NoteViewEntity -> NoteEntity (UI -> DB)
 fun NoteViewEntity.toEntity(): NoteEntity {
     return NoteEntity(
-        noteId = id,
-        title = title,
-        description = description,
+        noteId = id ?: 0L,
+        title = title ?: "",
+        description = description ?: "",
         image = image,
-        createdAt = createdAt,
-        updatedAt = updatedAt,
-        isFavorite = isFavorite
+        createdAt = createdAt ?: 0L,
+        updatedAt = updatedAt ?: 0L,
+        isFavorite = isFavorite ?: false
     )
 }

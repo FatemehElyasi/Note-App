@@ -12,14 +12,14 @@ import org.koin.core.annotation.Single
 @Single
 class NoteLocalDataSourceImpl(
     private val noteDao: NoteDao,
-    private val labelDao: LabelDao
+    private val labelDao: LabelDao,
 ) : NoteLocalDataSource {
 
     override fun getAllNotes(): Flow<List<NoteEntity>> {
         return noteDao.getAllNotes()
     }
-    override fun getNoteById(id: Long ): Flow<NoteEntity> {
-        return noteDao.getNoteById(id)
+    override fun getNoteById(noteId: Long): Flow<NoteEntity> {
+        return noteDao.getNoteById(noteId = noteId)
     }
     override suspend fun insertNote(note: NoteEntity): Long {
         return noteDao.insertNote(note = note)
@@ -27,27 +27,37 @@ class NoteLocalDataSourceImpl(
     override suspend fun updateNote(note: NoteEntity) {
         return noteDao.updateNote(note = note)
     }
+    override suspend fun deleteNoteById(noteId: Long) {
+        return noteDao.deleteNoteById(noteId = noteId)
+    }
     override suspend fun deleteNote(note: NoteEntity) {
         return noteDao.deleteNote(note = note)
     }
-    override suspend fun deleteAll() {
-        return noteDao.deleteAll()
+    override suspend fun deleteAllNotes() {
+        return noteDao.deleteAllNotes()
     }
-    override fun searchNotes(query: String): Flow<List<NoteEntity>> {
-        return noteDao.searchNotes(query = query)
+    override suspend fun setFavoriteNote(noteId: Long, isFavorite: Boolean) {
+        return noteDao.setFavoriteNote(noteId = noteId, isFavorite = isFavorite)
     }
     override fun getFavoriteNotes(): Flow<List<NoteEntity>> {
         return noteDao.getFavoriteNotes()
     }
-    override suspend fun setFavorite(noteId: Long, isFavorite: Boolean) {
-        return noteDao.setFavorite(noteId = noteId, isFavorite = isFavorite)
+    override fun searchNotes(query: String): Flow<List<NoteEntity>> {
+        return noteDao.searchNotes(query = query)
     }
 
-    override fun getByLabelName(label: String): Flow<List<LabelEntity>> {
-        return labelDao.getByLabelName(label = label)
+    // ------------------------------------- Labels
+    override fun getAllLabels(): Flow<List<LabelEntity>> {
+        return labelDao.getAllLabels()
+    }
+    override fun getLabelsByName(label: String): Flow<List<LabelEntity>> {
+        return labelDao.getLabelsByName(label = label)
     }
     override suspend fun insertLabel(label: LabelEntity): Long {
         return labelDao.insertLabel(label = label)
+    }
+    override suspend fun insertAllLabels(labels: List<LabelEntity>) {
+        return labelDao.insertAllLabels(labels = labels)
     }
     override suspend fun updateLabel(label: LabelEntity) {
         return labelDao.updateLabel(label = label)
@@ -55,23 +65,30 @@ class NoteLocalDataSourceImpl(
     override suspend fun deleteLabel(label: LabelEntity) {
         return labelDao.deleteLabel(label = label)
     }
+    override suspend fun deleteLabelById(labelId: Long) {
+        return labelDao.deleteLabelById(labelId = labelId)
+    }
+    override suspend fun getLabelsCount(): Long {
+        return labelDao.getLabelsCount()
+    }
 
+    // ------------------------------------- Notes with Labels
     override fun getNotesWithLabels(): Flow<List<NoteWithLabels>> {
         return noteDao.getNotesWithLabels()
     }
-    override suspend fun insertCrossRefs(crossList: List<CrossEntity>) {
-        return noteDao.insertCrossRefs(crossList = crossList)
+    override fun getNoteWithLabelsById(noteId: Long): Flow<NoteWithLabels> {
+        return noteDao.getNoteWithLabelsById(noteId = noteId)
     }
-    override suspend fun deleteCrossRefsForNote(noteId: Long) {
-       return noteDao.deleteCrossRefsForNote(noteId = noteId)
-    }
-    override suspend fun getFavoriteNotesWithLabels(): List<NoteWithLabels> {
+    override fun getFavoriteNotesWithLabels(): Flow<List<NoteWithLabels>> {
         return noteDao.getFavoriteNotesWithLabels()
     }
-    override suspend fun replaceCrossRefsForNote(noteId: Long, newCrossRefs: List<CrossEntity>) {
-       return noteDao.replaceCrossRefsForNote(noteId= noteId, newCrossRefs = newCrossRefs)
+
+    // ------------------------------------- Cross References
+    override suspend fun insertOrUpdateNoteWithLabels(note: NoteEntity, crossRefs: List<CrossEntity> ): Long {
+        return noteDao.insertOrUpdateNoteWithLabels(note = note, crossRefs = crossRefs)
     }
-    override suspend fun updateNoteWithLabels(note: NoteEntity, newCrossRefs: List<CrossEntity>) {
-        return noteDao.updateNoteWithLabels(note = note, newCrossRefs = newCrossRefs)
+    override suspend fun replaceCrossRefs(noteId: Long, newCrossRefs: List<CrossEntity>) {
+        return noteDao.replaceCrossRefs(noteId = noteId, newCrossRefs = newCrossRefs)
     }
+
 }
