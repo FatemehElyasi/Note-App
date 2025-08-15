@@ -8,11 +8,11 @@ import androidx.room.PrimaryKey
 data class LabelEntity(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo("labelId")
-    val labelId: Int? = 0,
+    val labelId: Long?,
 
     @ColumnInfo("labelName")
-    val labelName: String?,
+    val labelName: String,
 
     @ColumnInfo("labelColor")
-    val labelColor: String?
+    val labelColor: String
 )

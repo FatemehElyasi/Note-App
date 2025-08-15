@@ -27,55 +27,60 @@ interface NoteDao {
     @Update
     suspend fun updateNote(note: NoteEntity)
 
+    @Query("DELETE FROM note_table WHERE noteId = :noteId")
+    suspend fun deleteNoteById(noteId: Long)
+
     @Delete
     suspend fun deleteNote(note: NoteEntity)
 
     @Query("DELETE FROM note_table")
-    suspend fun deleteAll()
-
-    @Query("SELECT * FROM note_table WHERE title LIKE '%' || :query || '%' OR description LIKE '%' || :query || '%'")
-    fun searchNotes(query: String): Flow<List<NoteEntity>>
+    suspend fun deleteAllNotes()
 
     @Query("SELECT * FROM note_table WHERE isFavorite = 1 ORDER BY updatedAt DESC")
     fun getFavoriteNotes(): Flow<List<NoteEntity>>
 
     @Query("UPDATE note_table SET isFavorite = :isFavorite WHERE noteId = :noteId")
-    suspend fun setFavorite(noteId: Long, isFavorite: Boolean)
+    suspend fun setFavoriteNote(noteId: Long, isFavorite: Boolean)
 
+    @Query("SELECT * FROM note_table WHERE title LIKE '%' || :query || '%' OR description LIKE '%' || :query || '%'")
+    fun searchNotes(query: String): Flow<List<NoteEntity>>
+
+    // ------------------------------------- Notes with Labels(view)
     @Transaction
     @Query("SELECT * FROM note_table")
     fun getNotesWithLabels(): Flow<List<NoteWithLabels>>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertCrossRefs(crossList: List<CrossEntity>)
-
     @Transaction
-    suspend fun deleteCrossRefsForNote(noteId: Long) = deleteCrossRefsForNoteInternal(noteId)
-
-
-    @Query("DELETE FROM note_label_join WHERE noteId = :noteId")
-    suspend fun deleteCrossRefsForNoteInternal(noteId: Long)
+    @Query("SELECT * FROM note_table WHERE noteId = :noteId")
+    fun getNoteWithLabelsById(noteId: Long): Flow<NoteWithLabels>
 
     @Transaction
     @Query("SELECT * FROM note_table WHERE isFavorite = 1")
-    suspend fun getFavoriteNotesWithLabels(): List<NoteWithLabels>
+    fun getFavoriteNotesWithLabels(): Flow<List<NoteWithLabels>>
+
+    // ------------------------------------- Cross References(many-to-many)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertCrossRefs(crossList: List<CrossEntity>)
+
+    @Query("DELETE FROM note_label_join WHERE noteId = :noteId")
+    suspend fun deleteCrossRefs(noteId: Long)
 
     @Transaction
-    suspend fun replaceCrossRefsForNote(noteId: Long, newCrossRefs: List<CrossEntity>) {
-        deleteCrossRefsForNoteInternal(noteId)
+    suspend fun insertOrUpdateNoteWithLabels(note: NoteEntity, crossRefs: List<CrossEntity>): Long {
+        val noteId = note.noteId ?: insertNote(note)
+        deleteCrossRefs(noteId)
+        if (crossRefs.isNotEmpty()) {
+            insertCrossRefs(crossRefs)
+        }
+        return noteId
+    }
+
+    @Transaction
+    suspend fun replaceCrossRefs(noteId: Long, newCrossRefs: List<CrossEntity>) {
+        deleteCrossRefs(noteId)
         if (newCrossRefs.isNotEmpty()) {
             insertCrossRefs(newCrossRefs)
         }
     }
 
-    @Transaction
-    suspend fun updateNoteWithLabels(
-        note: NoteEntity, newCrossRefs: List<CrossEntity>
-    ) {
-        updateNote(note)
-        deleteCrossRefsForNoteInternal(note.noteId?.toLong() ?: 0)
-        if (newCrossRefs.isNotEmpty()) {
-            insertCrossRefs(newCrossRefs)
-        }
-    }
 }

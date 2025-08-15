@@ -14,8 +14,8 @@ fun LabelEntity.toViewEntity(): LabelViewEntity {
 //LabelViewEntity -> LabelEntity = UI -> DB
 fun LabelViewEntity.toEntity(): LabelEntity {
     return LabelEntity(
-        labelId = this.labelId,
-        labelName = this.labelName,
-        labelColor = this.labelColor
+        labelId = this.labelId ?: 0L,
+        labelName = this.labelName ?: "",
+        labelColor = this.labelColor ?: ""
     )
 }

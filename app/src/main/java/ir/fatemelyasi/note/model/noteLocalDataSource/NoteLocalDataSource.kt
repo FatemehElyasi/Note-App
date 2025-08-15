@@ -9,26 +9,30 @@ import kotlinx.coroutines.flow.Flow
 interface NoteLocalDataSource {
 
     fun getAllNotes(): Flow<List<NoteEntity>>
-    fun getNoteById(id: Long): Flow<NoteEntity>
-    suspend fun insertNote(note: NoteEntity) : Long
+    fun getNoteById(noteId: Long): Flow<NoteEntity>
+    suspend fun insertNote(note: NoteEntity): Long
     suspend fun updateNote(note: NoteEntity)
+    suspend fun deleteNoteById(noteId: Long)
     suspend fun deleteNote(note: NoteEntity)
-    suspend fun deleteAll()
-    fun searchNotes(query: String): Flow<List<NoteEntity>>
+    suspend fun deleteAllNotes()
+    suspend fun setFavoriteNote(noteId: Long, isFavorite: Boolean)
     fun getFavoriteNotes(): Flow<List<NoteEntity>>
-    suspend fun setFavorite(noteId: Long, isFavorite: Boolean)
+    fun searchNotes(query: String): Flow<List<NoteEntity>>
 
-    fun getByLabelName(label: String): Flow<List<LabelEntity>>
-    suspend fun insertLabel(label: LabelEntity)
+    fun getAllLabels(): Flow<List<LabelEntity>>
+    fun getLabelsByName(label: String): Flow<List<LabelEntity>>
+    suspend fun insertLabel(label: LabelEntity): Long
+    suspend fun insertAllLabels(labels: List<LabelEntity>)
     suspend fun updateLabel(label: LabelEntity)
     suspend fun deleteLabel(label: LabelEntity)
+    suspend fun deleteLabelById(labelId: Long)
+    suspend fun getLabelsCount(): Long
 
     fun getNotesWithLabels(): Flow<List<NoteWithLabels>>
-    suspend fun insertCrossRefs(crossList: List<CrossEntity>)
-    suspend fun deleteCrossRefsForNote(noteId: Long)
-    suspend fun getFavoriteNotesWithLabels(): List<NoteWithLabels>
-    suspend fun replaceCrossRefsForNote(noteId: Long, newCrossRefs: List<CrossEntity>)
-    suspend fun updateNoteWithLabels(note: NoteEntity, newCrossRefs: List<CrossEntity>)
+    fun getNoteWithLabelsById(noteId: Long): Flow<NoteWithLabels>
+    fun getFavoriteNotesWithLabels(): Flow<List<NoteWithLabels>>
 
-
+    suspend fun insertOrUpdateNoteWithLabels(note: NoteEntity, crossRefs: List<CrossEntity> ): Long
+    suspend fun replaceCrossRefs(noteId: Long, newCrossRefs: List<CrossEntity>)
 }
+

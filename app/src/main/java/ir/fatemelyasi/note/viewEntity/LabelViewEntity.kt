@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class LabelViewEntity(
-    val labelId: Int? = 0,
+    val labelId: Long? = null,
     val labelName: String?,
     val labelColor: String?
 )
