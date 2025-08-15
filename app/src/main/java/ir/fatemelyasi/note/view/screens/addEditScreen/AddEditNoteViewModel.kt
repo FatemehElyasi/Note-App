@@ -6,26 +6,34 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ir.fatemelyasi.note.model.local.entity.CrossEntity
+import ir.fatemelyasi.note.model.local.entity.LabelEntity
 import ir.fatemelyasi.note.model.local.entity.NoteEntity
+import ir.fatemelyasi.note.model.local.mappers.toEntity
 import ir.fatemelyasi.note.model.local.mappers.toViewEntity
 import ir.fatemelyasi.note.model.noteLocalRepository.NoteLocalRepository
+import ir.fatemelyasi.note.view.utils.formatted.randomColorHex
 import ir.fatemelyasi.note.view.utils.states.AddEditNoteState
 import ir.fatemelyasi.note.view.viewEntity.LabelViewEntity
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel
 class AddEditNoteViewModel(
-    private val repository: NoteLocalRepository
+    private val repository: NoteLocalRepository,
 ) : ViewModel() {
 
     var state by mutableStateOf(AddEditNoteState())
         private set
-
     private var currentNoteId: Long? = null
+
+    val allLabels: StateFlow<List<LabelViewEntity>> =
+        repository.getAllLabels()
+            .map { databaseLabels -> databaseLabels.map { it.toViewEntity() } }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
 
     fun onTitleChange(newTitle: String) {
         if (newTitle.length <= 200) {
@@ -48,102 +56,118 @@ class AddEditNoteViewModel(
         )
     }
 
-    fun onLabelToggle(label: LabelViewEntity) {
-        val current = state.labels.toMutableList()
-        if (current.contains(label)) {
-            current.remove(label)
-        } else {
-            current.add(label)
+    fun removeLabel(label: LabelViewEntity) {
+        viewModelScope.launch {
+            repository.deleteLabel(label.toEntity())
+            state = state.copy(
+                labels = state.labels.filterNot {
+                    it.labelId == label.labelId
+                }
+            )
         }
-        state = state.copy(labels = current)
     }
 
     fun loadNote(noteId: Long) {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                val noteWithLabels = repository.getNotesWithLabels()
-                    .first()
-                    .firstOrNull { it.note.noteId == noteId }
+        viewModelScope.launch {
+            repository.getNoteWithLabelsById(noteId).collect { noteWithLabels ->
+                currentNoteId = noteWithLabels.note.noteId
 
-                noteWithLabels?.let { it ->
-                    currentNoteId = it.note.noteId
-
-                    withContext(Dispatchers.Main) {
-                        state = state.copy(
-                            title = it.note.title ?: "",
-                            description = it.note.description ?: "",
-                            image = it.note.image,
-                            isFavorite = it.note.isFavorite == true,
-                            createdAt = it.note.createdAt,
-                            labels = it.labels.map { it.toViewEntity() }
-                        )
-                    }
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    state = state.copy(error = e.localizedMessage)
-                }
+                state = state.copy(
+                    title = noteWithLabels.note.title,
+                    description = noteWithLabels.note.description,
+                    image = noteWithLabels.note.image,
+                    isFavorite = noteWithLabels.note.isFavorite,
+                    createdAt = noteWithLabels.note.createdAt,
+                    labels = noteWithLabels.labels.map { it.toViewEntity() }
+                )
             }
         }
     }
 
     fun saveNote(onSuccess: () -> Unit, onError: (String) -> Unit) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             try {
+                if (state.title.isBlank()) {
+                    state = state.copy(error = "Title cannot be empty.")
+                    return@launch
+                }
+                if (state.description.isBlank()) {
+                    state = state.copy(error = "Description cannot be empty.")
+                    return@launch
+                }
+
                 val now = System.currentTimeMillis()
-
-                if (state.title.trim().isEmpty()) {
-                    withContext(Dispatchers.Main) {
-                        state = state.copy(
-                            error = "Title cannot be empty."
-                        )
-                    }
-                    return@launch
-                }
-
-                if (state.description.trim().isEmpty()) {
-                    withContext(Dispatchers.Main) {
-                        state = state.copy(
-                            error = "Description cannot be empty."
-                        )
-                    }
-                    return@launch
-                }
-
-                val isEditing = currentNoteId != null
                 val note = NoteEntity(
                     noteId = currentNoteId,
                     title = state.title,
                     description = state.description,
-                    image = state.image,
-                    isFavorite = state.isFavorite,
-                    createdAt = if (isEditing) state.createdAt ?: now else now,
-                    updatedAt = now
+                    image = state.image ?: "",
+                    createdAt = state.createdAt ?: now,
+                    updatedAt = now,
+                    isFavorite = state.isFavorite
                 )
 
-                val noteId = if (isEditing) {
-                    repository.updateNote(note)
-                    currentNoteId!!
-                } else {
-                    repository.insertNote(note)
+                val labelEntities = state.labels.map {
+                    it.toEntity()
                 }
 
-
-                repository.replaceCrossRefsForNote(
-                    noteId = noteId,
-                    newCrossRefs = state.labels.map {
-                        CrossEntity(noteId.toInt(), it.labelId ?: 0)
+                repository.insertOrUpdateNoteWithLabels(
+                    note = note,
+                    crossRefs = labelEntities.map { label ->
+                        CrossEntity(
+                            noteId = note.noteId ?: 0L,
+                            labelId = label.labelId ?: 0L
+                        )
                     }
                 )
 
-                withContext(Dispatchers.Main) {
-                    state = state.copy(isSaved = true)
-                    onSuccess()
-                }
+                onSuccess()
             } catch (e: Exception) {
                 onError(e.localizedMessage ?: "Unknown error")
             }
         }
     }
+
+    fun showAddLabelDialog() {
+        state = state.copy(
+            isAddLabelDialogOpen = true
+        )
+    }
+
+    fun closeAddLabelDialog() {
+        state = state.copy(
+            isAddLabelDialogOpen = false,
+            newLabelName = ""
+        )
+    }
+
+    fun onNewLabelNameChange(name: String) {
+        state = state.copy(
+            newLabelName = name
+        )
+    }
+
+    fun addLabelToDb() {
+        val name = state.newLabelName.trim()
+        if (name.isBlank()) return
+
+        if (state.labels.any {
+                it.labelName.equals(name, ignoreCase = true)
+            }) {
+            return
+        }
+
+        val newLabel = LabelEntity(
+            labelId = null,
+            labelName = name,
+            labelColor = randomColorHex()
+        )
+        viewModelScope.launch {
+            repository.insertLabel(newLabel)
+        }
+        closeAddLabelDialog()
+    }
+
 }
+
 

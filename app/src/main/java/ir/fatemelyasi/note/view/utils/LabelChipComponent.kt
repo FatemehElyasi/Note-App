@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
@@ -26,19 +27,15 @@ import ir.fatemelyasi.note.view.utils.formatted.toComposeColorOr
 import ir.fatemelyasi.note.view.viewEntity.LabelViewEntity
 
 @Composable
-fun LabelChip(
+fun LabelChipComponent(
     label: LabelViewEntity,
-    isSelected: Boolean = false,
     modifier: Modifier = Modifier,
-    onClick: (() -> Unit)? = null,
+    onRemove: (() -> Unit)? = null,
 ) {
     val typography = LocalCustomTypography.current
     val colors = LocalCustomColors.current
 
-    val backgroundColor = when {
-        isSelected -> (label.labelColor?.safeHexColor() ?: "#CCCCCC").toComposeColorOr()
-        else -> colors.background
-    }
+    val backgroundColor = (label.labelColor?.safeHexColor() ?: "#CCCCCC").toComposeColorOr()
     val contentColor = contentColorFor(backgroundColor)
 
     Surface(
@@ -47,7 +44,7 @@ fun LabelChip(
         shape = RoundedCornerShape(16.dp),
         tonalElevation = 2.dp,
         border = BorderStroke(1.dp, colors.outline),
-        modifier = if (onClick != null) modifier.clickable { onClick() } else modifier
+        modifier = modifier
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
@@ -68,8 +65,20 @@ fun LabelChip(
             Text(
                 text = label.labelName ?: "",
                 style = typography.titleSmall,
-                color = colors.onPrimary
+                color = contentColor
             )
+
+            onRemove?.let {
+                Spacer(modifier = Modifier.width(8.dp))
+                androidx.compose.material3.Icon(
+                    imageVector = androidx.compose.material.icons.Icons.Default.Close,
+                    contentDescription = "Remove Label",
+                    modifier = Modifier
+                        .size(16.dp)
+                        .clickable { it() },
+                    tint = contentColor
+                )
+            }
         }
     }
 }

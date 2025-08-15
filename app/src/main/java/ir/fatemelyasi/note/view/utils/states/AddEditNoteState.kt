@@ -10,5 +10,7 @@ data class AddEditNoteState(
     val isFavorite: Boolean = false,
     val error: String? = null,
     val createdAt: Long? = null,
-    val isSaved: Boolean = false
+    val isSaved: Boolean = false,
+    val isAddLabelDialogOpen: Boolean = false,
+    val newLabelName: String = ""
 )

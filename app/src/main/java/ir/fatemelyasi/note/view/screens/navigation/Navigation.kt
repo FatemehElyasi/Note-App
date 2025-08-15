@@ -11,7 +11,6 @@ import ir.fatemelyasi.note.view.screens.addEditScreen.AddEditNoteViewModel
 import ir.fatemelyasi.note.view.screens.detailScreen.NoteDetailScreen
 import ir.fatemelyasi.note.view.screens.detailScreen.NoteDetailViewModel
 import ir.fatemelyasi.note.view.screens.homeListScreen.HomeNoteListScreen
-import ir.fatemelyasi.note.view.utils.labelsMock
 import ir.fatemelyasi.note.view.utils.myScreens.MyScreens
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -31,7 +30,6 @@ fun Navigation() {
                 noteId = dataModel.noteId,
                 viewModel = viewModel,
                 onBack = { navController.popBackStack() },
-                availableLabels = labelsMock()
             )
         }
         composable<MyScreens.NoteDetailScreen> { backStackEntry ->

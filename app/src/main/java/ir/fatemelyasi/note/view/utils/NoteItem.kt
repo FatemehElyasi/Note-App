@@ -62,7 +62,7 @@ fun NoteItem(
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = note.title,
+                    text = note.title?:"",
                     style = typography.headlineSmall
                 )
 
