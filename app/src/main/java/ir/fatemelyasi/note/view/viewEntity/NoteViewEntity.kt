@@ -5,11 +5,11 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class NoteViewEntity(
     val id: Long?,
-    val title: String,
+    val title: String?,
     val description: String?,
     val image: String?,
     val date: String,
-    val isFavorite: Boolean = false,
+    val isFavorite: Boolean? = false,
     val createdAt: Long?,
     val updatedAt: Long?,
     val labels: List<LabelViewEntity>
