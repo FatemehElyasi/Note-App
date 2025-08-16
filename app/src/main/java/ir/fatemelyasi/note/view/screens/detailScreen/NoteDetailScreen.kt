@@ -37,7 +37,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import ir.fatemelyasi.note.view.ui.theme.LocalCustomColors
-import ir.fatemelyasi.note.view.utils.formatted.toComposeColorOr
+import ir.fatemelyasi.note.view.utils.LabelChipComponent
 import org.koin.androidx.compose.koinViewModel
 import java.io.File
 
@@ -136,19 +136,11 @@ fun NoteDetailScreen(
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 state.labels.forEach { label ->
-                                    Box(
-                                        modifier = Modifier
-                                            .clip(RoundedCornerShape(12.dp))
-                                            .border(1.dp, colors.outline, RoundedCornerShape(12.dp))
-                                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                                    ) {
-                                        Text(
-                                            text = label.labelName?:"",
-                                            color = label.labelColor?.toComposeColorOr() ?: colors.onBackground,
-                                            style = MaterialTheme.typography.bodyMedium
-                                        )
-                                    }
+                                    LabelChipComponent(
+                                        label = label,
+                                    )
                                 }
+
                             }
                         }
                     }

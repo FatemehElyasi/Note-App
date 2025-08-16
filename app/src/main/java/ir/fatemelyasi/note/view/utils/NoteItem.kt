@@ -1,10 +1,8 @@
 package ir.fatemelyasi.note.view.utils
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -28,7 +26,6 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import ir.fatemelyasi.note.view.ui.theme.LocalCustomColors
 import ir.fatemelyasi.note.view.ui.theme.LocalCustomTypography
-import ir.fatemelyasi.note.view.utils.formatted.toComposeColorOr
 import ir.fatemelyasi.note.view.utils.formatted.toFormattedDate
 import ir.fatemelyasi.note.view.viewEntity.NoteViewEntity
 
@@ -50,31 +47,36 @@ fun NoteItem(
     ) {
         Row(
             modifier = Modifier
-                .padding(12.dp)
+                .padding(16.dp)
         ) {
-            // Note Image (if available)
             if (!note.image.isNullOrEmpty()) {
                 Image(
                     painter = rememberAsyncImagePainter(model = note.image),
                     contentDescription = "Note Image",
                     modifier = Modifier
-                        .size(64.dp)
-                        .clip(RoundedCornerShape(8.dp)),
+                        .size(72.dp)
+                        .clip(RoundedCornerShape(12.dp)),
                     contentScale = ContentScale.Crop
                 )
                 Spacer(modifier = Modifier.width(12.dp))
             }
 
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = note.title ?: "", style = typography.headlineSmall)
+                Text(
+                    text = note.title ?: "",
+                    style = typography.headlineSmall
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
                 Text(
                     text = note.description ?: "",
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
-                    style = typography.displaySmall
+                    style = typography.bodyMedium
                 )
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
                 if (note.labels.isNotEmpty()) {
                     FlowRow(
@@ -82,26 +84,10 @@ fun NoteItem(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         note.labels.forEach { label ->
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .border(
-                                        1.dp,
-                                        colors.outline,
-                                        RoundedCornerShape(12.dp)
-                                    )
-                                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                            ) {
-                                Text(
-                                    text = label.labelName ?: "",
-                                    color = label.labelColor?.toComposeColorOr()
-                                        ?: colors.onBackground,
-                                    style = typography.bodyMedium
-                                )
-                            }
+                            LabelChipComponent(label = label)
                         }
                     }
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
 
                 Text(
