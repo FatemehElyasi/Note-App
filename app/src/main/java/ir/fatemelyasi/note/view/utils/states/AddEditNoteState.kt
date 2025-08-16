@@ -3,6 +3,7 @@ package ir.fatemelyasi.note.view.utils.states
 import ir.fatemelyasi.note.view.viewEntity.LabelViewEntity
 
 data class AddEditNoteState(
+    val noteId: Long? = null,
     val title: String = "",
     val description: String = "",
     val image: String? = null,
