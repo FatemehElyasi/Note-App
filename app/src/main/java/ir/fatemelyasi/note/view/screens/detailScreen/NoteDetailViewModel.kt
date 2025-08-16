@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel
@@ -54,12 +55,17 @@ class NoteDetailViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 repository.deleteNoteById(noteId)
-                onSuccess()
+
+                withContext(Dispatchers.Main) {
+                    onSuccess()
+                }
 
             } catch (e: Exception) {
-                _state.value = _state.value.copy(
-                    error = e.localizedMessage ?: "Failed to delete note"
-                )
+                withContext(Dispatchers.Main) {
+                    _state.value = _state.value.copy(
+                        error = e.localizedMessage ?: "Failed to delete note"
+                    )
+                }
             }
         }
     }
