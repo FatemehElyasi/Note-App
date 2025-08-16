@@ -67,10 +67,19 @@ interface NoteDao {
 
     @Transaction
     suspend fun insertOrUpdateNoteWithLabels(note: NoteEntity, crossRefs: List<CrossEntity>): Long {
-        val noteId = note.noteId ?: insertNote(note)
+        val noteId = if (note.noteId != null && note.noteId != 0L) {
+            updateNote(note)
+            note.noteId
+        } else {
+            insertNote(note)
+        }
         deleteCrossRefs(noteId)
+
         if (crossRefs.isNotEmpty()) {
-            insertCrossRefs(crossRefs)
+            val updatedCrossRefs = crossRefs.map { crossRef ->
+                crossRef.copy(noteId = noteId)
+            }
+            insertCrossRefs(updatedCrossRefs)
         }
         return noteId
     }

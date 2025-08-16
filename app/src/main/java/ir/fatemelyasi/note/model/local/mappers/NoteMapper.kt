@@ -26,7 +26,7 @@ fun NoteViewEntity.toEntity(): NoteEntity {
         noteId = id ?: 0L,
         title = title ?: "",
         description = description ?: "",
-        image = image,
+        image = image ?: "",
         createdAt = createdAt ?: 0L,
         updatedAt = updatedAt ?: 0L,
         isFavorite = isFavorite ?: false
