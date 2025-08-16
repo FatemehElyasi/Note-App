@@ -51,7 +51,6 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import java.io.File
 
-
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun AddEditNoteScreen(
@@ -60,7 +59,7 @@ fun AddEditNoteScreen(
     viewModel: AddEditNoteViewModel = koinViewModel(),
 ) {
     val state = viewModel.state
-    val allLabels by viewModel.allLabels.collectAsState()
+//    val allLabels by viewModel.allLabels.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val snackBarHostState = remember { SnackbarHostState() }
 
@@ -77,7 +76,11 @@ fun AddEditNoteScreen(
     }
 
     LaunchedEffect(Unit) {
-        noteId?.let { viewModel.loadNote(it) }
+        if (noteId == null) {
+            viewModel.clearForNewNote()
+        } else {
+            noteId.let { viewModel.loadNote(it) }
+        }
     }
 
     Scaffold(
@@ -100,9 +103,7 @@ fun AddEditNoteScreen(
                                 onSuccess = { onBack() },
                                 onError = { msg ->
                                     coroutineScope.launch {
-                                        snackBarHostState.showSnackbar(
-                                            msg
-                                        )
+                                        snackBarHostState.showSnackbar(msg)
                                     }
                                 }
                             )
@@ -186,24 +187,25 @@ fun AddEditNoteScreen(
                 onClick = { viewModel.showAddLabelDialog() },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp),
-
                 ) {
                 Text("Add Label")
             }
 
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                allLabels.forEach { label ->
-                    LabelChipComponent(
-                        label = label,
-                        onRemove = { viewModel.removeLabel(label) },
-                    )
+
+            if (state.labels.isNotEmpty()) {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    state.labels.forEach { label ->
+                        LabelChipComponent(
+                            label = label,
+                            onRemove = { viewModel.removeLabel(label) }
+                        )
+                    }
                 }
             }
 
-            // Add Label Dialog
             if (state.isAddLabelDialogOpen) {
                 AlertDialog(
                     onDismissRequest = { viewModel.closeAddLabelDialog() },
@@ -217,17 +219,16 @@ fun AddEditNoteScreen(
                     },
                     confirmButton = {
                         TextButton(
-                            onClick = { viewModel.addLabelToDb() })
-                        { Text("Add") }
+                            onClick = { viewModel.addLabelToDb() }
+                        ) { Text("Add") }
                     },
                     dismissButton = {
                         TextButton(
-                            onClick = { viewModel.closeAddLabelDialog() })
-                        { Text("Cancel") }
+                            onClick = { viewModel.closeAddLabelDialog() }
+                        ) { Text("Cancel") }
                     }
                 )
             }
         }
     }
 }
-

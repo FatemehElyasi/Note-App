@@ -14,6 +14,7 @@ import ir.fatemelyasi.note.model.noteLocalRepository.NoteLocalRepository
 import ir.fatemelyasi.note.view.utils.formatted.randomColorHex
 import ir.fatemelyasi.note.view.utils.states.AddEditNoteState
 import ir.fatemelyasi.note.view.viewEntity.LabelViewEntity
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -34,6 +35,11 @@ class AddEditNoteViewModel(
         repository.getAllLabels()
             .map { databaseLabels -> databaseLabels.map { it.toViewEntity() } }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
+
+    fun clearForNewNote() {
+        state = AddEditNoteState()
+        currentNoteId = null
+    }
 
     fun onTitleChange(newTitle: String) {
         if (newTitle.length <= 200) {
@@ -68,7 +74,7 @@ class AddEditNoteViewModel(
     }
 
     fun loadNote(noteId: Long) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             repository.getNoteWithLabelsById(noteId).collect { noteWithLabels ->
                 currentNoteId = noteWithLabels.note.noteId
 
@@ -88,11 +94,15 @@ class AddEditNoteViewModel(
         viewModelScope.launch {
             try {
                 if (state.title.isBlank()) {
-                    state = state.copy(error = "Title cannot be empty.")
+                    state = state.copy(
+                        error = "Title cannot be empty."
+                    )
                     return@launch
                 }
                 if (state.description.isBlank()) {
-                    state = state.copy(error = "Description cannot be empty.")
+                    state = state.copy(
+                        error = "Description cannot be empty."
+                    )
                     return@launch
                 }
 
@@ -107,19 +117,20 @@ class AddEditNoteViewModel(
                     isFavorite = state.isFavorite
                 )
 
-                val labelEntities = state.labels.map {
-                    it.toEntity()
-                }
+                val finalNoteId = repository.insertOrUpdateNoteWithLabels(note, emptyList())
 
-                repository.insertOrUpdateNoteWithLabels(
-                    note = note,
-                    crossRefs = labelEntities.map { label ->
+                val crossRefs = state.labels.mapNotNull { label ->
+                    label.labelId?.let { labelId ->
                         CrossEntity(
-                            noteId = note.noteId ?: 0L,
-                            labelId = label.labelId ?: 0L
+                            noteId = finalNoteId,
+                            labelId = labelId
                         )
                     }
-                )
+                }
+
+                if (crossRefs.isNotEmpty()) {
+                    repository.replaceCrossRefs(finalNoteId, crossRefs)
+                }
 
                 onSuccess()
             } catch (e: Exception) {
@@ -162,12 +173,22 @@ class AddEditNoteViewModel(
             labelName = name,
             labelColor = randomColorHex()
         )
+
         viewModelScope.launch {
-            repository.insertLabel(newLabel)
+            try {
+                val insertedLabelId = repository.insertLabel(newLabel)
+
+                val newLabelView = newLabel.copy(labelId = insertedLabelId).toViewEntity()
+                state = state.copy(
+                    labels = state.labels + newLabelView,
+                    isAddLabelDialogOpen = false,
+                    newLabelName = ""
+                )
+            } catch (e: Exception) {
+                state = state.copy(
+                    error = "Failed to add label: ${e.localizedMessage}"
+                )
+            }
         }
-        closeAddLabelDialog()
     }
-
 }
-
-

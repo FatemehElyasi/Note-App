@@ -5,6 +5,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -35,10 +37,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import ir.fatemelyasi.note.view.ui.theme.LocalCustomColors
+import ir.fatemelyasi.note.view.utils.formatted.toComposeColorOr
 import org.koin.androidx.compose.koinViewModel
 import java.io.File
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun NoteDetailScreen(
     noteId: Long,
@@ -56,28 +59,17 @@ fun NoteDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    Text(
-                        text = state.note?.title ?: "Note Detail"
-                    )
-                },
+                title = { Text(text = state.note?.title ?: "Note Detail") },
                 navigationIcon = {
-                    IconButton(
-                        onClick = { onBack() }
-                    ) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
-                        )
+                    IconButton(onClick = { onBack() }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 actions = {
-                    IconButton(
-                        onClick = { viewModel.toggleFavorite() }
-                    ) {
+                    IconButton(onClick = { viewModel.toggleFavorite() }) {
                         Icon(
-                            imageVector = if (state.note?.isFavorite == true) Icons.Filled.Favorite
-                            else Icons.Outlined.FavoriteBorder,
+                            imageVector = if (state.note?.isFavorite == true)
+                                Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                             contentDescription = "Toggle Favorite"
                         )
                     }
@@ -98,12 +90,7 @@ fun NoteDetailScreen(
                 .fillMaxSize()
         ) {
             if (state.isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .align(
-                            Alignment.Center
-                        )
-                )
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             } else if (state.error != null) {
                 Text(
                     text = state.error ?: "",
@@ -113,11 +100,10 @@ fun NoteDetailScreen(
             } else {
                 state.note?.let { note ->
                     Column(
-                        modifier = Modifier
-                            .fillMaxSize(),
+                        modifier = Modifier.fillMaxSize(),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        if (note.image != null) {
+                        if (!note.image.isNullOrEmpty()) {
                             AsyncImage(
                                 model = File(note.image),
                                 contentDescription = "Note Image",
@@ -139,10 +125,35 @@ fun NoteDetailScreen(
                             text = note.description ?: "",
                             style = MaterialTheme.typography.bodyMedium
                         )
+
+                        if (state.labels.isNotEmpty()) {
+                            Text(
+                                text = "Labels:",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            FlowRow(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                state.labels.forEach { label ->
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .border(1.dp, colors.outline, RoundedCornerShape(12.dp))
+                                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                                    ) {
+                                        Text(
+                                            text = label.labelName?:"",
+                                            color = label.labelColor?.toComposeColorOr() ?: colors.onBackground,
+                                            style = MaterialTheme.typography.bodyMedium
+                                        )
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
     }
 }
-
