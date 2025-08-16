@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import ir.fatemelyasi.note.model.local.mappers.toViewEntity
 import ir.fatemelyasi.note.model.noteLocalRepository.NoteLocalRepository
 import ir.fatemelyasi.note.view.utils.states.NoteListState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -23,8 +24,8 @@ class NoteListViewModel(
     }
 
     private fun observeNotes() {
-        viewModelScope.launch {
-            repository.getAllNotes()
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.getNotesWithLabels()
                 .collect { notes ->
                     val viewNotes = notes.map { entity ->
                         entity.toViewEntity()
