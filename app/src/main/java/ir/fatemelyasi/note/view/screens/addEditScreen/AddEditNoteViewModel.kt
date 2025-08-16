@@ -191,4 +191,22 @@ class AddEditNoteViewModel(
             }
         }
     }
+
+    fun toggleLabelSelection(label: LabelViewEntity) {
+        val isSelected = state.labels.any {
+            it.labelId == label.labelId
+        }
+
+        state = if (isSelected) {
+            state.copy(
+                labels = state.labels.filterNot {
+                    it.labelId == label.labelId
+                }
+            )
+        } else {
+            state.copy(
+                labels = state.labels + label
+            )
+        }
+    }
 }

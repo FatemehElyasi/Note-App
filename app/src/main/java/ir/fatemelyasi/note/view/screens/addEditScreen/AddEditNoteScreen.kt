@@ -5,10 +5,12 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,7 +21,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,7 +33,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -37,10 +40,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import ir.fatemelyasi.note.view.ui.theme.LocalCustomColors
@@ -59,7 +64,7 @@ fun AddEditNoteScreen(
     viewModel: AddEditNoteViewModel = koinViewModel(),
 ) {
     val state = viewModel.state
-//    val allLabels by viewModel.allLabels.collectAsState()
+    val allLabels by viewModel.allLabels.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val snackBarHostState = remember { SnackbarHostState() }
 
@@ -193,6 +198,11 @@ fun AddEditNoteScreen(
 
 
             if (state.labels.isNotEmpty()) {
+                Text(
+                    text = "Selected Labels:",
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -200,7 +210,6 @@ fun AddEditNoteScreen(
                     state.labels.forEach { label ->
                         LabelChipComponent(
                             label = label,
-                            onRemove = { viewModel.removeLabel(label) }
                         )
                     }
                 }
@@ -209,23 +218,83 @@ fun AddEditNoteScreen(
             if (state.isAddLabelDialogOpen) {
                 AlertDialog(
                     onDismissRequest = { viewModel.closeAddLabelDialog() },
-                    title = { Text("Add New Label") },
+                    title = { Text("Manage Labels") },
                     text = {
-                        TextField(
-                            value = state.newLabelName,
-                            onValueChange = viewModel::onNewLabelNameChange,
-                            placeholder = { Text("Label name") }
-                        )
+                        Column {
+                            // Add new label section
+                            OutlinedTextField(
+                                value = state.newLabelName,
+                                onValueChange = viewModel::onNewLabelNameChange,
+                                placeholder = { Text("New label name") },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+
+                            TextButton(
+                                onClick = { viewModel.addLabelToDb() },
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            ) {
+                                Text("Add New Label")
+                            }
+
+                            if (allLabels.isNotEmpty()) {
+                                Text(
+                                    text = "Select from existing labels:",
+                                    fontWeight = FontWeight.Medium,
+                                    modifier = Modifier.padding(vertical = 8.dp)
+                                )
+
+                                Column {
+                                    allLabels.forEach { label ->
+                                        val isSelected =
+                                            state.labels.any { it.labelId == label.labelId }
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = 4.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Row(
+                                                modifier = Modifier
+                                                    .weight(1f)
+                                                    .clickable {
+                                                        viewModel.toggleLabelSelection(
+                                                            label
+                                                        )
+                                                    },
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Checkbox(
+                                                    checked = isSelected,
+                                                    onCheckedChange = {
+                                                        viewModel.toggleLabelSelection(label)
+                                                    }
+                                                )
+                                                Text(
+                                                    text = label.labelName ?: "",
+                                                    modifier = Modifier.padding(start = 8.dp),
+                                                )
+                                            }
+
+                                            IconButton(
+                                                onClick = { viewModel.removeLabel(label) }
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Clear,
+                                                    contentDescription = "Delete Label",
+                                                    tint = colors.onPrimary,
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     },
                     confirmButton = {
                         TextButton(
-                            onClick = { viewModel.addLabelToDb() }
-                        ) { Text("Add") }
-                    },
-                    dismissButton = {
-                        TextButton(
                             onClick = { viewModel.closeAddLabelDialog() }
-                        ) { Text("Cancel") }
+                        ) { Text("Done") }
                     }
                 )
             }
