@@ -1,4 +1,4 @@
-package ir.fatemelyasi.note.view.utils
+package ir.fatemelyasi.note.view.utils.components
 
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarData

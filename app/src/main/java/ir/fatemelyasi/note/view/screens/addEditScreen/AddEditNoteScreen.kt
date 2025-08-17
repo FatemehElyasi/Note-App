@@ -49,8 +49,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import ir.fatemelyasi.note.view.ui.theme.LocalCustomColors
-import ir.fatemelyasi.note.view.utils.LabelChipComponent
-import ir.fatemelyasi.note.view.utils.MessageSnackBarHost
+import ir.fatemelyasi.note.view.utils.components.LabelChipComponent
+import ir.fatemelyasi.note.view.utils.components.MessageSnackBarHost
 import ir.fatemelyasi.note.view.utils.saveImageToInternalStorage
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel

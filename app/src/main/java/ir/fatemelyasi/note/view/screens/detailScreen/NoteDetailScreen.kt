@@ -37,7 +37,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import ir.fatemelyasi.note.view.ui.theme.LocalCustomColors
-import ir.fatemelyasi.note.view.utils.LabelChipComponent
+import ir.fatemelyasi.note.view.utils.components.LabelChipComponent
 import org.koin.androidx.compose.koinViewModel
 import java.io.File
 

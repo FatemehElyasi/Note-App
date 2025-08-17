@@ -20,7 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import ir.fatemelyasi.note.view.utils.NoteItem
+import ir.fatemelyasi.note.view.utils.components.NoteItem
 import ir.fatemelyasi.note.view.viewEntity.NoteViewEntity
 import org.koin.compose.viewmodel.koinViewModel
 
