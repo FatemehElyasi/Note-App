@@ -31,7 +31,7 @@ import ir.fatemelyasi.note.view.viewEntity.NoteViewEntity
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun NoteItem(
+fun NoteItemComponent(
     note: NoteViewEntity,
     onClick: () -> Unit
 ) {

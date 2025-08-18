@@ -11,7 +11,7 @@ import ir.fatemelyasi.note.model.local.entity.NoteEntity
 import ir.fatemelyasi.note.model.local.mappers.toEntity
 import ir.fatemelyasi.note.model.local.mappers.toViewEntity
 import ir.fatemelyasi.note.model.noteLocalRepository.NoteLocalRepository
-import ir.fatemelyasi.note.view.utils.formatted.randomColorHex
+import ir.fatemelyasi.note.view.utils.randomColorHex
 import ir.fatemelyasi.note.view.utils.states.AddEditNoteState
 import ir.fatemelyasi.note.view.viewEntity.LabelViewEntity
 import kotlinx.coroutines.Dispatchers

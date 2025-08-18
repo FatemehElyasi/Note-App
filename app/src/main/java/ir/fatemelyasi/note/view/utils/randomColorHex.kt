@@ -1,4 +1,4 @@
-package ir.fatemelyasi.note.view.utils.formatted
+package ir.fatemelyasi.note.view.utils
 
 fun randomColorHex(): String {
     val r = (150..255).random()
