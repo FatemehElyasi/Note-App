@@ -1,5 +1,6 @@
 package ir.fatemelyasi.note.model.local.mappers
 
+import ir.fatemelyasi.note.model.local.entity.LabelEntity
 import ir.fatemelyasi.note.model.local.entity.NoteEntity
 import ir.fatemelyasi.note.view.utils.formatted.toFormattedDate
 import ir.fatemelyasi.note.view.viewEntity.NoteViewEntity

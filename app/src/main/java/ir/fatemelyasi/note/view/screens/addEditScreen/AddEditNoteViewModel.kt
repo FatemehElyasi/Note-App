@@ -29,7 +29,6 @@ class AddEditNoteViewModel(
 
     var state by mutableStateOf(AddEditNoteState())
         private set
-    private var currentNoteId: Long? = null
 
     val allLabels: StateFlow<List<LabelViewEntity>> =
         repository.getAllLabels()
@@ -38,7 +37,6 @@ class AddEditNoteViewModel(
 
     fun clearForNewNote() {
         state = AddEditNoteState()
-        currentNoteId = null
     }
 
     fun onTitleChange(newTitle: String) {
@@ -76,11 +74,11 @@ class AddEditNoteViewModel(
     fun loadNote(noteId: Long) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.getNoteWithLabelsById(noteId).collect { noteWithLabels ->
-                currentNoteId = noteWithLabels.note.noteId
 
                 state = state.copy(
+                    noteId = noteWithLabels.note.noteId,
                     title = noteWithLabels.note.title,
-                    description = noteWithLabels.note.description,
+                    description = noteWithLabels.note.description ?: "",
                     image = noteWithLabels.note.image,
                     isFavorite = noteWithLabels.note.isFavorite,
                     createdAt = noteWithLabels.note.createdAt,
@@ -108,11 +106,11 @@ class AddEditNoteViewModel(
 
                 val now = System.currentTimeMillis()
                 val note = NoteEntity(
-                    noteId = currentNoteId,
+                    noteId = state.noteId,
                     title = state.title,
                     description = state.description,
-                    image = state.image ?: "",
-                    createdAt = state.createdAt ?: now,
+                    image = state.image,
+                    createdAt = state.createdAt,
                     updatedAt = now,
                     isFavorite = state.isFavorite
                 )

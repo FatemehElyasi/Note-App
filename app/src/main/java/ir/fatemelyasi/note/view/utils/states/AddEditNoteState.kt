@@ -10,7 +10,8 @@ data class AddEditNoteState(
     val labels: List<LabelViewEntity> = emptyList(),
     val isFavorite: Boolean = false,
     val error: String? = null,
-    val createdAt: Long? = null,
+    val createdAt: Long = System.currentTimeMillis(),
+    val updatedAt: Long? = null,
     val isSaved: Boolean = false,
     val isAddLabelDialogOpen: Boolean = false,
     val newLabelName: String = ""
