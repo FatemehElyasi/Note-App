@@ -1,8 +1,8 @@
 package ir.fatemelyasi.note.model.noteLocalRepository
 
+import ir.fatemelyasi.note.model.local.entity.NoteEntity
 import ir.fatemelyasi.note.model.local.entity.CrossEntity
 import ir.fatemelyasi.note.model.local.entity.LabelEntity
-import ir.fatemelyasi.note.model.local.entity.NoteEntity
 import ir.fatemelyasi.note.model.local.entity.NoteWithLabels
 import kotlinx.coroutines.flow.Flow
 

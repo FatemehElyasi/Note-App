@@ -1,5 +1,6 @@
 package ir.fatemelyasi.note.model.local.dao
 
+import ir.fatemelyasi.note.model.local.entity.NoteEntity
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -8,7 +9,6 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import ir.fatemelyasi.note.model.local.entity.CrossEntity
-import ir.fatemelyasi.note.model.local.entity.NoteEntity
 import ir.fatemelyasi.note.model.local.entity.NoteWithLabels
 import kotlinx.coroutines.flow.Flow
 
@@ -67,7 +67,7 @@ interface NoteDao {
 
     @Transaction
     suspend fun insertOrUpdateNoteWithLabels(note: NoteEntity, crossRefs: List<CrossEntity>): Long {
-        val noteId = if (note.noteId != null && note.noteId != 0L) {
+        val noteId = if (note.noteId != null) {
             updateNote(note)
             note.noteId
         } else {
