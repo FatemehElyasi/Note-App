@@ -1,8 +1,5 @@
 package ir.fatemelyasi.note.view.screens.addEditScreen
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ir.fatemelyasi.note.model.local.entity.CrossEntity
@@ -15,10 +12,10 @@ import ir.fatemelyasi.note.view.utils.randomColorHex
 import ir.fatemelyasi.note.view.utils.states.AddEditNoteState
 import ir.fatemelyasi.note.view.viewEntity.LabelViewEntity
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
 
@@ -27,97 +24,133 @@ class AddEditNoteViewModel(
     private val repository: NoteLocalRepository,
 ) : ViewModel() {
 
-    var state by mutableStateOf(AddEditNoteState())
-        private set
+    private val _state = MutableStateFlow(AddEditNoteState())
+    val state: StateFlow<AddEditNoteState> = _state
 
-    val allLabels: StateFlow<List<LabelViewEntity>> =
-        repository.getAllLabels()
-            .map { databaseLabels -> databaseLabels.map { it.toViewEntity() } }
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
+    init {
+        loadLabels()
+    }
+
+    fun loadLabels() {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.getAllLabels().map {
+                it.map { label ->
+                    label.toViewEntity()
+                }
+            }
+                .collect { labels ->
+                    _state.update {
+                        it.copy(
+                            labels = labels
+                        )
+                    }
+                }
+        }
+    }
 
     fun clearForNewNote() {
-        state = AddEditNoteState()
+        _state.value = AddEditNoteState()
     }
 
     fun onTitleChange(newTitle: String) {
         if (newTitle.length <= 200) {
-            state = state.copy(
-                title = newTitle,
-                error = null
-            )
+            _state.update {
+                it.copy(
+                    title = newTitle,
+                    error = null
+                )
+            }
         }
     }
 
     fun onDescriptionChange(newDesc: String) {
-        state = state.copy(
-            description = newDesc
-        )
+        _state.update {
+            it.copy(
+                description = newDesc
+            )
+        }
     }
 
     fun onImageChange(newImage: String?) {
-        state = state.copy(
-            image = newImage
-        )
+        _state.update {
+            it.copy(
+                image = newImage
+            )
+        }
     }
 
     fun removeLabel(label: LabelViewEntity) {
-        viewModelScope.launch {
-            repository.deleteLabel(label.toEntity())
-            state = state.copy(
-                labels = state.labels.filterNot {
-                    it.labelId == label.labelId
-                }
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.deleteLabel(
+                label.toEntity()
             )
+            _state.update {
+                it.copy(
+                    labels = it.labels
+                        .filterNot { it ->
+                            it.labelId == label.labelId
+                        }
+                )
+            }
         }
     }
 
     fun loadNote(noteId: Long) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.getNoteWithLabelsById(noteId).collect { noteWithLabels ->
-
-                state = state.copy(
-                    noteId = noteWithLabels.note.noteId,
-                    title = noteWithLabels.note.title,
-                    description = noteWithLabels.note.description ?: "",
-                    image = noteWithLabels.note.image,
-                    isFavorite = noteWithLabels.note.isFavorite,
-                    createdAt = noteWithLabels.note.createdAt,
-                    labels = noteWithLabels.labels.map { it.toViewEntity() }
-                )
+                _state.update {
+                    it.copy(
+                        noteId = noteWithLabels.note.noteId,
+                        title = noteWithLabels.note.title,
+                        description = noteWithLabels.note.description ?: "",
+                        image = noteWithLabels.note.image,
+                        isFavorite = noteWithLabels.note.isFavorite,
+                        createdAt = noteWithLabels.note.createdAt,
+                        labels = noteWithLabels.labels.map { label -> label.toViewEntity() }
+                    )
+                }
             }
         }
     }
 
     fun saveNote(onSuccess: () -> Unit, onError: (String) -> Unit) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
-                if (state.title.isBlank()) {
-                    state = state.copy(
-                        error = "Title cannot be empty."
-                    )
-                    return@launch
-                }
-                if (state.description.isBlank()) {
-                    state = state.copy(
-                        error = "Description cannot be empty."
-                    )
-                    return@launch
+                val currentState = _state.value
+                when {
+                    currentState.title.isBlank() -> {
+                        _state.update {
+                            it.copy(
+                                error = "Title cannot be empty."
+                            )
+                        }
+                        return@launch
+                    }
+
+                    currentState.description.isBlank() -> {
+                        _state.update {
+                            it.copy(
+                                error = "Description cannot be empty."
+                            )
+                        }
+                        return@launch
+                    }
                 }
 
-                val now = System.currentTimeMillis()
+                val currentDate = System.currentTimeMillis()
                 val note = NoteEntity(
-                    noteId = state.noteId,
-                    title = state.title,
-                    description = state.description,
-                    image = state.image,
-                    createdAt = state.createdAt,
-                    updatedAt = now,
-                    isFavorite = state.isFavorite
+                    noteId = currentState.noteId,
+                    title = currentState.title,
+                    description = currentState.description,
+                    image = currentState.image,
+                    createdAt = currentState.createdAt,
+                    updatedAt = currentDate,
+                    isFavorite = currentState.isFavorite
                 )
 
                 val finalNoteId = repository.insertOrUpdateNoteWithLabels(note, emptyList())
 
-                val crossRefs = state.labels.mapNotNull { label ->
+                val crossRefs = currentState.labels.mapNotNull { label ->
                     label.labelId?.let { labelId ->
                         CrossEntity(
                             noteId = finalNoteId,
@@ -130,41 +163,60 @@ class AddEditNoteViewModel(
                     repository.replaceCrossRefs(finalNoteId, crossRefs)
                 }
 
+                _state.update {
+                    it.copy(
+                        isSaved = true
+                    )
+                }
                 onSuccess()
             } catch (e: Exception) {
+                _state.update {
+                    it.copy(
+                        error = e.localizedMessage ?: "Unknown error"
+                    )
+                }
                 onError(e.localizedMessage ?: "Unknown error")
             }
         }
     }
 
     fun showAddLabelDialog() {
-        state = state.copy(
-            isAddLabelDialogOpen = true
-        )
+        _state.update {
+            it.copy(
+                isAddLabelDialogOpen = true
+            )
+        }
     }
 
     fun closeAddLabelDialog() {
-        state = state.copy(
-            isAddLabelDialogOpen = false,
-            newLabelName = ""
-        )
+        _state.update {
+            it.copy(
+                isAddLabelDialogOpen = false,
+                newLabelName = ""
+            )
+        }
     }
 
     fun onNewLabelNameChange(name: String) {
-        state = state.copy(
-            newLabelName = name
-        )
+        _state.update {
+            it.copy(
+                newLabelName = name
+            )
+        }
     }
 
     fun addLabelToDb() {
-        val name = state.newLabelName.trim()
-        if (name.isBlank()) return
+        val name = _state.value.newLabelName.trim()
 
-        if (state.labels.any {
-                it.labelName.equals(name, ignoreCase = true)
-            }) {
+        if (name.isBlank()) return
+        if (_state.value.labels.any {
+                it.labelName.equals(
+                    name,
+                    ignoreCase = true
+                )
+            }
+        )
             return
-        }
 
         val newLabel = LabelEntity(
             labelId = null,
@@ -172,38 +224,37 @@ class AddEditNoteViewModel(
             labelColor = randomColorHex()
         )
 
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 val insertedLabelId = repository.insertLabel(newLabel)
 
                 val newLabelView = newLabel.copy(labelId = insertedLabelId).toViewEntity()
-                state = state.copy(
-                    labels = state.labels + newLabelView,
-                    isAddLabelDialogOpen = false,
-                    newLabelName = ""
-                )
+                _state.update {
+                    it.copy(
+                        labels = it.labels + newLabelView,
+                        isAddLabelDialogOpen = false,
+                        newLabelName = ""
+                    )
+                }
             } catch (e: Exception) {
-                state = state.copy(
-                    error = "Failed to add label: ${e.localizedMessage}"
-                )
+                _state.update {
+                    it.copy(
+                        error = "Failed to add label: ${e.localizedMessage}"
+                    )
+                }
             }
         }
     }
 
     fun toggleLabelSelection(label: LabelViewEntity) {
-        val isSelected = state.labels.any {
-            it.labelId == label.labelId
-        }
-
-        state = if (isSelected) {
-            state.copy(
-                labels = state.labels.filterNot {
-                    it.labelId == label.labelId
-                }
-            )
-        } else {
-            state.copy(
-                labels = state.labels + label
+        _state.update {
+            it.copy(
+                labels = if (
+                    it.labels.any { l -> l.labelId == label.labelId }
+                )
+                    it.labels.filterNot { l -> l.labelId == label.labelId }
+                else
+                    it.labels + label
             )
         }
     }
