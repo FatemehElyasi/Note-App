@@ -6,4 +6,3 @@ import ir.fatemelyasi.note.view.viewEntity.NoteViewEntity
 fun NoteWithLabels.toViewEntity(): NoteViewEntity {
     return note.toViewEntity(labels)
 }
-

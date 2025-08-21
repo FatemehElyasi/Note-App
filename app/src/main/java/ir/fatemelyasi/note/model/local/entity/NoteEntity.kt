@@ -9,24 +9,23 @@ data class NoteEntity(
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "noteId")
-    val noteId: Long?,
+    val noteId: Long? = null,
 
     @ColumnInfo(name = "title")
     val title: String,
 
     @ColumnInfo(name = "description")
-    val description: String,
+    val description: String? = null,
 
     @ColumnInfo(name = "image")
-    val image: String,
+    val image: String? = null,
 
     @ColumnInfo(name = "createdAt")
-    val createdAt: Long,
+    val createdAt: Long = System.currentTimeMillis(),
 
     @ColumnInfo(name = "updatedAt")
-    val updatedAt: Long,
+    val updatedAt: Long? = null,
 
     @ColumnInfo(name = "isFavorite")
-    val isFavorite: Boolean,
-
-    )
+    val isFavorite: Boolean = false,
+)
