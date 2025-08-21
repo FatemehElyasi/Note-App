@@ -19,6 +19,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
 
+private const val TITLE_MAX_LIMIT = 200
+
 @KoinViewModel
 class AddEditNoteViewModel(
     private val repository: NoteLocalRepository,
@@ -26,6 +28,7 @@ class AddEditNoteViewModel(
 
     private val _state = MutableStateFlow(AddEditNoteState())
     val state: StateFlow<AddEditNoteState> = _state
+
 
     init {
         loadLabels()
@@ -53,7 +56,7 @@ class AddEditNoteViewModel(
     }
 
     fun onTitleChange(newTitle: String) {
-        if (newTitle.length <= 200) {
+        if (newTitle.length <= TITLE_MAX_LIMIT) {
             _state.update {
                 it.copy(
                     title = newTitle,
